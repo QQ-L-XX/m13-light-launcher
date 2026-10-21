@@ -1,0 +1,13 @@
+build/
+dist/
+.signing/
+local.env
+*.jks
+*.keystore
+*.apk
+*.idsig
+*.class
+*.pyc
+__pycache__/
+.DS_Store
+Thumbs.db

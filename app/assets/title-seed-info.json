@@ -1,0 +1,16 @@
+{
+  "source": "https://cj.lziapi.com/api.php/provide/vod",
+  "downloadedAt": "2026-10-20T19:33:58+0800",
+  "pagesRead": 8008,
+  "reportedEntries": 160146,
+  "uniqueTitles": 158753,
+  "bytes": 1365387,
+  "allCachedPagesValidated": true,
+  "failures": [],
+  "runtime": "seed only, native provider search and incremental refresh on box",
+  "indexedChineseTitles": 158445,
+  "phoneticKeys": 1239773,
+  "databaseBytes": 156962816,
+  "compressedBytes": 41346673,
+  "variantsPerTitleCap": 16
+}

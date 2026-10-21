@@ -1,0 +1,39 @@
+LibreTV TV adaptation for local.m13.home
+
+The standalone Apple CMS source parser adapts source-format handling from:
+LibreSpark/LibreTV, https://github.com/LibreSpark/LibreTV
+Licensed under GNU Affero General Public License version 3.
+The complete license is included as LibreTV-AGPL-3.0.txt.
+Corresponding launcher and client source, assets and build script:
+https://github.com/QQ-L-XX/m13-light-launcher
+This local adaptation is distributed under AGPL-3.0, with third-party
+certificate data retaining its own license.
+
+Mozilla CA certificate data is copied without modification from
+certifi 2026.2.25 (cacert.pem). See certifi-LICENSE.txt for MPL-2.0 terms
+and the Mozilla source reference.
+Certificate verification and HTTPS hostname checks remain enabled.
+
+The Patrick Hand font is from Google Fonts, copyright the Patrick Hand project authors, under the SIL Open Font License 1.1. See PatrickHand-OFL.txt.
+Weather is fetched on-device from Open-Meteo (https://open-meteo.com/). Weather data attribution: Open-Meteo, CC BY 4.0; see https://open-meteo.com/en/licence. No weather server code is included.
+
+
+Pinyin dictionary: mozillazg/pinyin-data (MIT).
+See pinyin-data-info.json for pinned commit, original SHA256 and transformation.
+MIT copyright and license are included in pinyin-data-MIT-LICENSE.txt.
+Title index seed: title-only list metadata from the configured catalogue API,
+collected at install preparation; attribution and coverage in title-seed-info.json.
+No media files, stream addresses, synopses or posters are packaged in the index.
+Native title matching includes pinyin, initials, case/width normalization and
+bounded polyphonic alternatives (16 per title). Runtime refresh and learning
+run on the box. At most 128 resolved Chinese titles per search; UI prompts to
+refine when this bound is reached. Each source/query has independent pagination.
+
+
+Search results group normalized titles and release years within the same work
+type. Known conflicting Douban IDs, different years, sequels, seasons, features,
+documentaries, commentaries and trailers remain distinct. Common language and
+bracketed quality/year suffixes normalize. Missing years require a shared ID.
+Each original provider/video ID remains an independent selectable version;
+pagination appends variants to existing posters. Playback/history retain the
+selected original provider record, episode list and source-specific progress.

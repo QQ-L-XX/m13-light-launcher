@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/mozillazg/pinyin-data",
+  "commit": "9e5e9bdfe8add694300e0cc93a27b803b68377f9",
+  "original_url": "https://raw.githubusercontent.com/mozillazg/pinyin-data/9e5e9bdfe8add694300e0cc93a27b803b68377f9/pinyin.txt",
+  "original_sha256": "7365b877d2a60f64d13de522ad882ce928c7b60c4c5d26fe3c89783e72ab1115",
+  "entries": 44440,
+  "conversion": "NFD tone removal, u diaeresis -> v, deduplicate readings; preserve polyphony",
+  "license": "MIT"
+}
