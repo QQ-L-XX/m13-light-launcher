@@ -4,8 +4,8 @@
 
 # 轻桌面 · M13 Light Launcher
 
-**让旧电视盒子，回到简单好用的样子。**
-A minimal Android TV home with native video search, casting and a crayon weather clock.
+**看电影、听音乐，让天气和明日课程留在屏保里。**
+A minimal TV home for video, music, casting and a crayon weather & class calendar.
 
 [![Release](https://img.shields.io/github/v/release/QQ-L-XX/m13-light-launcher?color=13bdeb)](https://github.com/QQ-L-XX/m13-light-launcher/releases/latest)
 ![Android](https://img.shields.io/badge/Android-5.0%2B-43b883)
@@ -18,13 +18,29 @@ A minimal Android TV home with native video search, casting and a crayon weather
 
 ## 一个更安静的客厅 / A calmer living room
 
-为天猫魔盒 M13 改造的原生 Android 桌面：蓝红渐变、遥控器操作、常用应用入口，以及在盒子本地运行的影视搜索与播放。电脑关机后，桌面、投屏接收和本地搜索逻辑仍能独立工作；在线视频和天气需要盒子联网。
+为天猫魔盒 M13 改造的原生 Android 桌面：蓝红渐变、遥控器操作，把影视、轻音乐和投屏放在同一张首页。待机时，蜡笔日历显示福州今明天气及横向明日课程，并按日出日落切换配色。电脑关机后仍能独立运行；在线影视、音乐和天气需要盒子联网。
 
-A native Java launcher developed on a MagicBox M13. It runs directly on the box, without a PC server. Online catalogs, streams and weather still need internet access. This is an independent community adaptation, not an official LibreTV, Apple or Tmall product.
+A native Java launcher developed on a MagicBox M13: video, music and casting on the home screen, with a crayon calendar, two-day weather and tomorrow's classes during idle time. It runs on the box without a PC server; online media and weather require internet. This is an independent community adaptation, not an official LibreTV, Apple, NetEase or Tmall product.
 
-<img src="docs/images/home.png" alt="轻桌面实机首页，2.15 阶段截图" width="100%" />
+<img src="docs/images/home-2.24.png" alt="轻桌面 2.24 实机首页，含轻音乐、影视和投屏入口 / Home with music, video and casting" width="100%" />
 
-*实机界面参考：主页及日间截图来自 2.15，夜间截图来自 2.18。当前本地源码为 2.24，新增屏保明日课程；网易云扫码授权及账号歌曲播放已验证，部分按钮与布局已有更新。Third-party app icons belong to their owners.*
+*以下截图均为 2.24 在 M13 上的实际画面，拍摄于 2026-10-22。课程屏保使用示例内容，不含个人课表。Screenshots show 2.24 on M13; class names are demo data. Third-party app icons belong to their owners.*
+
+## 轻音乐 / Music on the box
+
+从首页打开轻音乐，直接搜歌曲或歌单，查看行歌词、收藏、播放历史和续听。用网易云 App 扫码授权后，按账号实际权限获取歌曲；播放区提供逐曲歌词时间校准。搜索、歌词和音频都由盒子获取，不需要电脑常开。
+
+Search tracks and playlists, follow line lyrics, save favorites and resume listening directly on the box. NetEase QR login uses your account's actual rights; per-track lyric timing can be adjusted. Availability is controlled by the provider. See [music features and limits](docs/MUSIC.md).
+
+<img src="docs/images/music-2.24.png" alt="轻音乐实机播放界面，展示搜索、网易云账号入口、歌词区域和歌词校准 / Native music playback" width="100%" />
+
+## 明天有安排，屏保看得见 / Tomorrow at a glance
+
+日历和天气区上移，底部七节课程横向排列，区分上午与下午；明日日期按北京时间自动更新。日间是浅色纸张，夜间是深蓝底色，支持日出日落自动切换。以下课表仅用于展示，公开安装包不附带个人课程。
+
+A seven-lesson row separates morning and afternoon beneath the calendar and weather. Tomorrow rolls over in Asia/Shanghai; day and night palettes can follow sunrise and sunset. Both images below use the same sample timetable. [Configure your own classes](docs/TIMETABLE.md).
+
+<table><tr><td width="50%"><img src="docs/images/timetable-day-demo-2.24.png" alt="日间课程屏保，示例课表 / Day screensaver with demo classes" /></td><td width="50%"><img src="docs/images/timetable-night-demo-2.24.png" alt="夜间课程屏保，示例课表 / Night screensaver with demo classes" /></td></tr><tr><td align="center">日间 · 示例课程 / Day · Demo classes</td><td align="center">夜间 · 示例课程 / Night · Demo classes</td></tr></table>
 
 ## 功能 / Features
 
@@ -37,8 +53,6 @@ A native Java launcher developed on a MagicBox M13. It runs directly on the box,
 | 视频投屏 / Casting | 同一局域网中的 DLNA/UPnP 视频 App 投屏，设备名“轻桌面 M13”。Video casting; **not AirPlay screen mirroring**. |
 | 蜡笔屏保 / Screensaver | 日历、福州今明天气、横向明日课程，按日出日落切换日夜配色。Calendar, two-day weather, tomorrow's classes and sunrise/sunset themes. |
 | 后台管理 / Background | 一键后台清理；桌面管理权限下可对指定应用按需启用，检测到媒体活动时保留后台。Playback-aware cleanup and optional on-demand app policies. |
-
-<table><tr><td width="50%"><img src="docs/images/day.png" alt="日间蜡笔日历屏保" /></td><td width="50%"><img src="docs/images/night.png" alt="夜间蜡笔日历屏保" /></td></tr><tr><td align="center">日间 / Day</td><td align="center">夜间 / Night</td></tr></table>
 
 日出日落在盒子离线计算，默认福州（26.0745°N, 119.2965°E），使用北京时间。天气通过 Open-Meteo 获取；太阳时刻为当地估算值，不能作为精密观测时间。Solar switching works offline; weather does not.
 
