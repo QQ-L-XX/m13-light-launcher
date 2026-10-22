@@ -12,3 +12,7 @@ dest=root/'build/tests';dest.mkdir(parents=True,exist_ok=True)
 sources=[root/'app/src/local/m13/home'/name for name in ['CrayonSolar.java','CrayonTheme.java']]+[root/'tests/M13SolarCheck.java']
 subprocess.run([tool('javac'),'-encoding','UTF-8','-d',str(dest),*map(str,sources)],check=True)
 subprocess.run([tool('java'),'-cp',str(dest),'M13SolarCheck'],check=True)
+subprocess.run([tool('javac'),'-encoding','UTF-8','-d',str(dest),str(root/'app/src/local/m13/home/MusicLyrics.java'),str(root/'tests/M13MusicChecks.java')],check=True)
+subprocess.run([tool('java'),'-cp',str(dest),'M13MusicChecks'],check=True)
+subprocess.run([tool('javac'),'-encoding','UTF-8','-d',str(dest),str(root/'app/src/local/m13/home/CrayonTimetable.java'),str(root/'tests/M13TimetableChecks.java')],check=True)
+subprocess.run([tool('java'),'-cp',str(dest),'M13TimetableChecks'],check=True)

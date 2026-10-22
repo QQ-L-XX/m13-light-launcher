@@ -27,8 +27,11 @@ public final class LibreTvLocalProxy implements Closeable {
         Thread accept=new Thread(new Runnable(){public void run(){while(!closed)try{final Socket s=server.accept();clients.add(s);try{workers.execute(new Runnable(){public void run(){serve(s);}});}catch(RejectedExecutionException e){clients.remove(s);s.close();}}catch(IOException e){if(!closed)close();}}},"M13-local-media");accept.setDaemon(true);accept.start();
     }
     public String url(String target)throws Exception{return "http://127.0.0.1:"+server.getLocalPort()+"/"+secret+"/"+Base64.encodeToString(target.getBytes("UTF-8"),Base64.URL_SAFE|Base64.NO_WRAP|Base64.NO_PADDING);}
-    private void headers(OutputStream out,int status,String type,long length)throws IOException{
-        String h="HTTP/1.1 "+status+" "+(status<400?"OK":"Error")+"\r\nContent-Type: "+type+"\r\nConnection: close\r\nCache-Control: no-store\r\n"+(length>=0?"Content-Length: "+length+"\r\n":"")+"\r\n";out.write(h.getBytes("US-ASCII"));
+    private void headers(OutputStream out,int status,String type,long length)throws IOException{headers(out,status,type,length,null);}
+    private void headers(OutputStream out,int status,String type,long length,String contentRange)throws IOException{
+        String rangeHeader="";
+        if(status==206&&contentRange!=null&&contentRange.matches("bytes [0-9]+-[0-9]+/([0-9]+|\\*)"))rangeHeader="Content-Range: "+contentRange+"\r\nAccept-Ranges: bytes\r\n";
+        String h="HTTP/1.1 "+status+" "+(status<400?"OK":"Error")+"\r\nContent-Type: "+type+"\r\nConnection: close\r\nCache-Control: no-store\r\n"+rangeHeader+(length>=0?"Content-Length: "+length+"\r\n":"")+"\r\n";out.write(h.getBytes("US-ASCII"));
     }
     private String line(InputStream in)throws IOException{ByteArrayOutputStream b=new ByteArrayOutputStream();int c;while((c=in.read())!=-1&&c!=10){if(b.size()>=8192)throw new IOException("Header too long");if(c!=13)b.write(c);}return b.toString("US-ASCII");}
     private void serve(Socket s){HttpURLConnection h=null;boolean sent=false;try{
@@ -39,7 +42,7 @@ public final class LibreTvLocalProxy implements Closeable {
         int status=h.getResponseCode();if(status!=200&&status!=206){headers(out,status,"text/plain",0);sent=true;return;}
         String type=h.getContentType();if(type==null)type="application/octet-stream";
         boolean playlist=type.toLowerCase(Locale.US).contains("mpegurl")||h.getURL().getPath().toLowerCase(Locale.US).endsWith(".m3u8");
-        if(first[0].equals("HEAD")){headers(out,status,type,length(h));sent=true;return;}
+        if(first[0].equals("HEAD")){headers(out,status,type,length(h),h.getHeaderField("Content-Range"));sent=true;return;}
         InputStream body=h.getInputStream();
         if(playlist){
             String text=new String(LibreTvNet.read(body,4*1024*1024),"UTF-8");if(!text.trim().startsWith("#EXTM3U"))throw new IOException("Invalid playlist");StringBuilder rewritten=new StringBuilder();
@@ -54,7 +57,7 @@ public final class LibreTvLocalProxy implements Closeable {
             byte[] prefixBytes=new byte[65536];int n=0,r;while(n<prefixBytes.length&&(r=body.read(prefixBytes,n,prefixBytes.length-n))!=-1)n+=r;
             int offset=0;if(type.startsWith("image/")){int found=-1;for(int i=0;i+376<n;i++)if(prefixBytes[i]==71&&prefixBytes[i+188]==71&&prefixBytes[i+376]==71){found=i;break;}if(found<0)throw new IOException("片源不是可播放的视频分片");offset=found;type="video/mp2t";}
             if(type.startsWith("text/html")||type.contains("javascript"))throw new IOException("片源返回了网页");
-            long size=length(h);headers(out,status,type,size<0?-1:size-offset);sent=true;out.write(prefixBytes,offset,n-offset);byte[] buf=new byte[32768];while((r=body.read(buf))!=-1)out.write(buf,0,r);
+            long size=length(h);headers(out,status,type,size<0?-1:size-offset,offset==0?h.getHeaderField("Content-Range"):null);sent=true;out.write(prefixBytes,offset,n-offset);byte[] buf=new byte[32768];while((r=body.read(buf))!=-1)out.write(buf,0,r);
         }out.flush();
     }catch(Exception e){if(!closed){lastError=e.getClass().getSimpleName()+": "+String.valueOf(e.getMessage()).replaceAll("https?://[^\\s]+","[source]");android.util.Log.e("M13LocalMedia",lastError);}if(!sent)try{headers(s.getOutputStream(),502,"text/plain",0);}catch(Exception ignored){}}
     finally{if(h!=null){upstreams.remove(h);h.disconnect();}clients.remove(s);try{s.close();}catch(IOException ignored){}}}

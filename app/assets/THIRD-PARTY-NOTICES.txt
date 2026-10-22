@@ -37,3 +37,19 @@ bracketed quality/year suffixes normalize. Missing years require a shared ID.
 Each original provider/video ID remains an independent selectable version;
 pagination appends variants to existing posters. Playback/history retain the
 selected original provider record, episode list and source-specific progress.
+
+Music module: TV interaction design informed by boluofan/music-tv.
+MusicLyrics.java is a Java API-21 port of the line-based portion of
+app/src/main/java/top/boluofan/musictv/domain/LyricParser.kt.
+Upstream https://github.com/boluofan/music-tv, Apache License 2.0,
+license included as Music-TV-Apache-2.0.txt. Modifications: Java port,
+LRC offset support and binary-search line lookup. Word karaoke and
+translation merging are not included. The Kotlin/Compose frontend
+and LX Server are not bundled. Direct-provider Java API and player
+are implemented inside this launcher; it is not an official Music-TV release.
+
+Offline QR generation: Project Nayuki QR Code generator library (MIT).
+https://github.com/nayuki/QR-Code-generator
+Pinned commit 3c6d0b3cefb4e049dc337e82237c9644399716a8.
+Four unmodified Java source files are included under app/src/io/nayuki/qrcodegen.
+Full license is in each source header and QRCode-Nayuki-MIT.txt.

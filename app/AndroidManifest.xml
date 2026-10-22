@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.m13.home" android:versionCode="29" android:versionName="2.21.1">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.m13.home" android:versionCode="38" android:versionName="2.24">
   <uses-permission android:name="local.m13.voice.PREWARM" />
   <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="22" />
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -16,6 +16,9 @@
   <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
   <uses-permission android:name="android.permission.WRITE_SETTINGS" />
   <application android:label="轻桌面" android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen" android:allowBackup="false" android:hardwareAccelerated="true">
+    <activity android:name=".MusicActivity" android:exported="true" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
+    <service android:name=".MusicService" android:exported="false" />
+    <receiver android:name=".MusicDiagnostics" android:exported="true" android:permission="android.permission.DUMP" />
     <activity android:name=".CrayonActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
     <service android:name=".CrayonDreamService" android:label="蜡笔日历与天气" android:exported="true" android:permission="android.permission.BIND_DREAM_SERVICE">
       <intent-filter><action android:name="android.service.dreams.DreamService" /></intent-filter>

@@ -24,7 +24,7 @@ A native Java launcher developed on a MagicBox M13. It runs directly on the box,
 
 <img src="docs/images/home.png" alt="轻桌面实机首页，2.15 阶段截图" width="100%" />
 
-*实机界面参考：主页及日间截图来自 2.15，夜间截图来自 2.18。当前源码为 2.21.1，部分按钮与布局已有更新。Third-party app icons belong to their owners.*
+*实机界面参考：主页及日间截图来自 2.15，夜间截图来自 2.18。当前本地源码为 2.24，新增屏保明日课程；网易云扫码授权及账号歌曲播放已验证，部分按钮与布局已有更新。Third-party app icons belong to their owners.*
 
 ## 功能 / Features
 
@@ -33,13 +33,18 @@ A native Java launcher developed on a MagicBox M13. It runs directly on the box,
 | 极简桌面 / Home | 蓝红配色、大卡片、遥控器焦点、应用与设置入口。Native TV navigation and app shortcuts. |
 | 影视 / Video | 海报首页、分类、中文模糊搜索、拼音与首字母搜索（如 `lldq`）、独立分页、观看记录。Posters, filters, fuzzy/pinyin/initial search, pagination and local history. |
 | 片源合并 / Grouping | 同名同年作品合并为海报，进入后选择片源；不同年份、续集等保留区分。Group compatible titles while retaining provider variants. |
+| 轻音乐 / Music | 独立搜歌、歌单、网易云扫码登录、账号权限播放、行歌词与校准、收藏及续听。On-device music and NetEase QR account login; see [music scope](docs/MUSIC.md). |
 | 视频投屏 / Casting | 同一局域网中的 DLNA/UPnP 视频 App 投屏，设备名“轻桌面 M13”。Video casting; **not AirPlay screen mirroring**. |
-| 蜡笔屏保 / Screensaver | 日历、时间、福州今明天气与小图标；按日出日落、固定时间或手动模式切换日夜配色。Calendar, two-day weather and sunrise/sunset themes. |
+| 蜡笔屏保 / Screensaver | 日历、福州今明天气、横向明日课程，按日出日落切换日夜配色。Calendar, two-day weather, tomorrow's classes and sunrise/sunset themes. |
 | 后台管理 / Background | 一键后台清理；桌面管理权限下可对指定应用按需启用，检测到媒体活动时保留后台。Playback-aware cleanup and optional on-demand app policies. |
 
 <table><tr><td width="50%"><img src="docs/images/day.png" alt="日间蜡笔日历屏保" /></td><td width="50%"><img src="docs/images/night.png" alt="夜间蜡笔日历屏保" /></td></tr><tr><td align="center">日间 / Day</td><td align="center">夜间 / Night</td></tr></table>
 
 日出日落在盒子离线计算，默认福州（26.0745°N, 119.2965°E），使用北京时间。天气通过 Open-Meteo 获取；太阳时刻为当地估算值，不能作为精密观测时间。Solar switching works offline; weather does not.
+
+屏保底部可显示明日课程：七节课横向排列，区分上午与下午，按北京时间跨日切换。课程表保存在盒子应用私有区，默认安装包不包含个人课程、姓名或班级；空课日显示暂无课程。按每周固定课表计算，调休及临时换课需另行更新。[课程配置 / Timetable configuration](docs/TIMETABLE.md). Personal timetables stay on-device and are not bundled in the public APK.
+
+当前公开版本 **2.24** 包含独立音乐、网易云账号登录、歌词校准与明日课程屏保。实机及构建检查见 [验证范围](docs/VALIDATION.md) 与 [音乐验证](docs/MUSIC-VALIDATION.md)。Version 2.24 includes standalone music, NetEase QR login, lyric calibration and the timetable screensaver.
 
 ## 开始使用 / Quick start
 
@@ -49,7 +54,7 @@ A native Java launcher developed on a MagicBox M13. It runs directly on the box,
 
 ```powershell
 adb devices -l
-adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.21.1.apk
+adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.24.apk
 adb -s <DEVICE_SERIAL> shell am start -n local.m13.home/.MainActivity
 ```
 

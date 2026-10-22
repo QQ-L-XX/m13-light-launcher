@@ -14,7 +14,12 @@ def jtool(name):
     if not value or not Path(value).is_file():raise SystemExit('JDK missing: set JAVA_HOME')
     return value
 def run(args,cwd=None):
-    subprocess.run(list(map(str,args)),cwd=cwd,check=True)
+    args=list(map(str,args))
+    if os.name=='nt' and sum(len(a)+3 for a in args)>24000 and Path(args[0]).stem in ['java','javac']:
+        response=build/('args-'+str(len(list(build.glob('args-*.txt'))))+'.txt')
+        response.write_text('\n'.join('"'+a.replace('\\','\\\\').replace('"','\\"')+'"' for a in args[1:])+'\n',encoding='utf-8')
+        args=[args[0],'@'+str(response)]
+    subprocess.run(args,cwd=cwd,check=True)
 for required in [androidjar,bt/('aapt'+suffix),bt/('zipalign'+suffix),bt/'lib/d8.jar',bt/'lib/apksigner.jar']:
     if not required.is_file():raise SystemExit('SDK component missing: '+str(required))
 if build.exists():

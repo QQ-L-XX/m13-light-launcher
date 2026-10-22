@@ -39,6 +39,8 @@ public final class LibreTvNet {
         URL u=new URL(value);if(!("http".equals(u.getProtocol())||"https".equals(u.getProtocol()))||u.getUserInfo()!=null)throw new IOException("不支持的片源地址");
         for(InetAddress a:InetAddress.getAllByName(u.getHost()))if(a.isAnyLocalAddress()||a.isLoopbackAddress()||a.isLinkLocalAddress()||a.isSiteLocalAddress()||a.isMulticastAddress())throw new IOException("片源地址不能指向内网设备");return u;
     }
+    /** Apply the same verified trust store before a caller connects. */
+    public static void configureTls(HttpURLConnection h){if(h instanceof HttpsURLConnection)((HttpsURLConnection)h).setSSLSocketFactory(tls);}
     public static HttpURLConnection open(String value,String range)throws Exception{
         return open(value,range,10000,20000);
     }

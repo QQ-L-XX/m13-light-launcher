@@ -87,11 +87,13 @@ public class MainActivity extends Activity {
         List<App> apps=new ArrayList<App>(map.values());
         final App libre=new App("LibreTV","__libretv__",null,new Intent(this,LibreTvLibraryActivity.class));
         apps.add(libre);
+        final App music=new App("轻音乐","__music__",null,new Intent(this,MusicActivity.class));apps.add(music);
         final App cast=new App("投屏","__cast__",null,new Intent(this,CastActivity.class));apps.add(cast);
         Collections.sort(apps,new Comparator<App>(){public int compare(App a,App b){return a.name.compareToIgnoreCase(b.name);}});
         if(allApps)return apps;
         List<App> home=new ArrayList<App>();
         if(!preferences.getBoolean("hidden:__libretv__",false))home.add(libre);
+        if(!preferences.getBoolean("hidden:__music__",false))home.add(music);
         for(String wanted:defaults)for(App app:apps)if(app.pkg.equals(wanted)&&!preferences.getBoolean("hidden:"+app.pkg,false))home.add(app);
         if(!preferences.getBoolean("hidden:__cast__",false))home.add(cast);
         for(App app:apps)if(preferences.getBoolean("favorite:"+app.pkg,false)&&!preferences.getBoolean("hidden:"+app.pkg,false)&&!home.contains(app))home.add(app);
@@ -100,6 +102,7 @@ public class MainActivity extends Activity {
     private String description(App app){
         if(AutostartPolicy.managed(this,app.pkg))return "按需启动 · 点开即可使用";
         if(app.pkg.equals("__libretv__"))return "电影 · 剧集 · 继续观看";
+        if(app.pkg.equals("__music__"))return "歌曲 · 歌单 · 同步歌词 · 本机独立运行";
         if(app.pkg.equals("__cast__"))return "把手机上的喜欢，放到大屏";
         if(app.pkg.equals("__more__"))return allApps?"回到常用应用":"所有应用，都在这里";
         if(app.pkg.equals("com.xiaodianshi.tv.yst"))return "视频与兴趣";
@@ -158,7 +161,7 @@ public class MainActivity extends Activity {
         GridLayout.LayoutParams p=new GridLayout.LayoutParams();p.width=width;p.height=dp(190);p.setMargins(dp(8),dp(7),dp(8),dp(12));grid.addView(card,p);
         final boolean libre=app.pkg.equals("__libretv__");
         final LinearLayout face=new LinearLayout(this);face.setGravity(Gravity.CENTER);face.setBackground(surface(libre?0xff185995:0xff214f83,libre?0xff702e5e:0xff20395f,0));card.addView(face,new LinearLayout.LayoutParams(-1,dp(142)));
-        final MinimalIcon glyph=app.icon==null?new MinimalIcon(app.pkg.equals("__libretv__")?"play":app.pkg.equals("__cast__")?"cast":allApps?"back":"grid",BlueRedTheme.BLUE):null;
+        final MinimalIcon glyph=app.icon==null?new MinimalIcon(app.pkg.equals("__libretv__")?"play":app.pkg.equals("__music__")?"music":app.pkg.equals("__cast__")?"cast":allApps?"back":"grid",BlueRedTheme.BLUE):null;
         ImageView icon=new ImageView(this);icon.setScaleType(ImageView.ScaleType.FIT_CENTER);
         if(app.icon!=null)icon.setImageDrawable(app.icon);else icon.setImageDrawable(glyph);
         face.addView(icon,new LinearLayout.LayoutParams(dp(58),dp(58)));
@@ -175,13 +178,13 @@ public class MainActivity extends Activity {
         }});
         if(!app.pkg.equals("__more__"))card.setOnLongClickListener(new View.OnLongClickListener(){public boolean onLongClick(View v){organize(app);return true;}});return card;
     }
-    private boolean isDefault(String pkg){if(pkg.equals("__libretv__")||pkg.equals("__cast__"))return true;for(String p:defaults)if(p.equals(pkg))return true;return false;}
+    private boolean isDefault(String pkg){if(pkg.equals("__music__")||pkg.equals("__libretv__")||pkg.equals("__cast__"))return true;for(String p:defaults)if(p.equals(pkg))return true;return false;}
     private void organize(final App app){
         final boolean visible=isDefault(app.pkg)?!preferences.getBoolean("hidden:"+app.pkg,false):preferences.getBoolean("favorite:"+app.pkg,false);
         new AlertDialog.Builder(this).setTitle(app.name).setItems(new String[]{visible?"从首页移除":"添加到首页","应用信息"},new android.content.DialogInterface.OnClickListener(){
             public void onClick(android.content.DialogInterface d,int which){
                 if(which==0){SharedPreferences.Editor e=preferences.edit();if(isDefault(app.pkg))e.putBoolean("hidden:"+app.pkg,visible);else e.putBoolean("favorite:"+app.pkg,!visible);e.apply();focusedPackage=null;build();}
-                else try{if(app.pkg.equals("__libretv__"))startActivity(new Intent(MainActivity.this,LibreTvLibraryActivity.class));else if(app.pkg.equals("__cast__"))startActivity(new Intent(MainActivity.this,CastActivity.class));else startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.parse("package:"+app.pkg)));}catch(Exception e){message("暂时无法打开应用信息");}
+                else try{if(app.pkg.equals("__libretv__"))startActivity(new Intent(MainActivity.this,LibreTvLibraryActivity.class));else if(app.pkg.equals("__music__"))startActivity(new Intent(MainActivity.this,MusicActivity.class));else if(app.pkg.equals("__cast__"))startActivity(new Intent(MainActivity.this,CastActivity.class));else startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.parse("package:"+app.pkg)));}catch(Exception e){message("暂时无法打开应用信息");}
             }
         }).show();
     }

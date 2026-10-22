@@ -1,5 +1,15 @@
 # 验证范围 / Validation scope
 
+## 2.24
+
+2026-10-22 在开发用 MagicBox M13 / Android API 22 安装 versionCode 38。系统实际屏保服务运行并绘制新增课程行；日间、夜间画面均已人工检查。七天课程配置回读匹配，恢复为日出日落自动配色，网易云私有账号会话跨更新仍有效。个人课表、实机课程截图与账号数据不随本仓库分发。
+
+Current 2.24 checks: full APK compilation/signature/ZIP integrity; 3,660 solar assertions; 1,022 lyric boundary assertions; 28 timetable date/rollover assertions. Day/night layout and the actual dream service were checked on M13. See MUSIC-VALIDATION.md for member-track and playback checks. This does not establish compatibility with other boxes or every music/video source.
+
+2.24 完整 APK SHA256: `facfac40ee264180791019770bbb7c55a83e6af31c795381151a410ced77c941`.
+
+## 2.21.1 historical publication checks
+
 公开版本 2.21.1 基于现存 2.21 桌面源码整理，仅修改公开版版本号、移除开发者服务器地址、更新源码声明及构建方式。当前已安装设备未被本次发布过程升级或改动。
 
 Public 2.21.1 is a publication build of local 2.21. Packaging changes do not constitute fresh device acceptance. This publication does not operate the ESP32 or attached storage.

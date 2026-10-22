@@ -11,10 +11,11 @@ import java.util.*;
 /** A quiet, locally drawn crayon calendar. The paper/calendar layer is cached. */
 public final class CrayonView extends View {
     private CrayonTheme.Palette colors=CrayonTheme.DAY;
-    public long paletteChanges;private long appearanceChecked;
+    public long paletteChanges;private long appearanceChecked,timetableRevision=-1;
     private int INK,ACCENT,BLUE,CORAL,YELLOW;
     public String appearance(){return colors.night?"night":"day";}
     private void refreshAppearance(){long time=SystemClock.elapsedRealtime();if(appearanceChecked!=0&&time-appearanceChecked<500)return;appearanceChecked=time;CrayonTheme.Palette next=CrayonAppearance.isNight(getContext())?CrayonTheme.NIGHT:CrayonTheme.DAY;
+        long revision=CrayonTimetableStore.revision(getContext());if(timetableRevision!=revision){timetableRevision=revision;paper=null;}
         if(paper==null||colors!=next){colors=next;INK=colors.ink;ACCENT=colors.accent;BLUE=colors.blue;CORAL=colors.coral;YELLOW=colors.yellow;paper=null;sunImage=null;moonImage=null;cloudImage=null;forecastImage=null;paletteChanges++;setBackgroundColor(colors.background);}}
     private final Handler handler=new Handler();private final Paint paint=new Paint(3);
     private final Typeface hand,body=Typeface.create("sans-serif",Typeface.NORMAL);
@@ -48,6 +49,7 @@ public final class CrayonView extends View {
         paper=Bitmap.createBitmap(1280,720,Bitmap.Config.RGB_565);Canvas c=new Canvas(paper);c.drawColor(colors.background);
         Random random=new Random(1858);paint.setStrokeWidth(.6f);for(int n=0;n<2800;n++){paint.setColor(n%2==0?colors.grain:(colors.night?0x047e9bc2:0x18ffffff));float x=random.nextInt(1280),y=random.nextInt(720);c.drawLine(x,y,x+random.nextInt(7)+1,y+(random.nextFloat()-.5f)*2,paint);}
         text(c,"轻桌面 · 蜡笔日历",70,57,14,colors.muted,body,Paint.Align.LEFT);text(c,"福州",1208,57,18,INK,body,Paint.Align.RIGHT);
+        int calendarLayer=c.save();c.translate(66,86);c.scale(.90f,.90f);c.translate(-66,-114);
         // Uneven paper edges, loose binding and wax strokes rather than a UI card.
         paint.setColor(colors.shadow);paint.setStyle(Paint.Style.FILL);c.drawRoundRect(new RectF(72,123,675,656),13,13,paint);
         paint.setColor(colors.card);c.drawRoundRect(new RectF(66,114,668,647),11,11,paint);
@@ -66,6 +68,7 @@ public final class CrayonView extends View {
         }
         // A little crayon garden along the bottom of the calendar.
         for(int n=0;n<8;n++){float x=122+n*66,y=627;line(c,x,y,x-2,y-13-n%3*4,ACCENT,2.5f,500+n);line(c,x,y-4,x-9,y-11,ACCENT,2.5f,530+n);line(c,x,y-6,x+8,y-16,ACCENT,2.5f,550+n);}
+        c.restoreToCount(calendarLayer);drawTimetable(c,date);
         text(c,"按任意键返回",71,694,12,colors.muted,body,Paint.Align.LEFT);
         SimpleDateFormat key=new SimpleDateFormat("yyyyMMdd",Locale.US);key.setTimeZone(zone);paperDate=key.format(date.getTime());
     }
@@ -73,6 +76,7 @@ public final class CrayonView extends View {
         float scale=Math.min(getWidth()/1280f,getHeight()/720f);int saved=canvas.save();canvas.translate((getWidth()-1280*scale)/2,(getHeight()-720*scale)/2);canvas.scale(scale,scale);
         double t=(SystemClock.elapsedRealtime()-started)/1000d;canvas.translate((float)Math.sin(t/43)*4,(float)Math.cos(t/53)*2);
         paint.setAlpha(255);canvas.drawBitmap(paper,0,0,paint);
+        int weatherLayer=canvas.save();canvas.translate(965,-10);canvas.scale(.90f,.86f);canvas.translate(-965,0);
         SimpleDateFormat clock=new SimpleDateFormat("HH:mm",Locale.US);clock.setTimeZone(zone);text(canvas,clock.format(date.getTime()),965,179,84,INK,hand,Paint.Align.CENTER);
         String[] days={"星期日","星期一","星期二","星期三","星期四","星期五","星期六"};text(canvas,days[date.get(Calendar.DAY_OF_WEEK)-1],965,214,17,colors.muted,body,Paint.Align.CENTER);
         CrayonWeather.Snapshot weather=CrayonWeather.get();boolean available=weather!=null&&weather.fresh();int code=available?weather.code:3;boolean daytime=!available||weather.day;
@@ -83,10 +87,24 @@ public final class CrayonView extends View {
         if(available&&!todayRange.isEmpty())text(canvas,"今天 "+todayRange,965,596,25,ACCENT,hand,Paint.Align.CENTER);
         plainLine(canvas,839,617,1091,617,colors.binding,1);
         drawTomorrow(canvas);
+        canvas.restoreToCount(weatherLayer);
         String stamp=weather==null?"天气 open-meteo.com · 等待联网更新":"天气 open-meteo.com · "+weather.asOf.replace('T',' ')+(CrayonWeather.error().isEmpty()?"":" · 更新暂不可用");text(canvas,stamp,1208,693,11,colors.muted,body,Paint.Align.RIGHT);
         canvas.restoreToCount(saved);
         if(frames%900==1){CrayonWeather.refresh(getContext());AutostartPolicy.applyIfIdle(getContext());}
     }
+    private void drawTimetable(Canvas c,Calendar date){
+        CrayonTimetable table=CrayonTimetableStore.read(getContext());if(table==null)return;CrayonTimetable.Day day=table.tomorrow(date.getTimeInMillis());String[] courses=day.courses();
+        text(c,"明日课程",70,591,18,INK,body,Paint.Align.LEFT);text(c,day.weekday+" · "+day.date.substring(5).replace('-','/'),173,591,14,ACCENT,hand,Paint.Align.LEFT);
+        if(courses.length==0){line(c,70,612,1208,612,ACCENT,2,8100);text(c,day.isoDay>=6?"周末 · 暂无常规课程":"明天暂无常规课程",639,651,20,colors.muted,body,Paint.Align.CENTER);return;}
+        text(c,"上午 1—4 节  /  下午 5—7 节",1208,591,12,colors.muted,body,Paint.Align.RIGHT);
+        float gap=10,width=(1138-gap*6-10)/7;
+        for(int n=0;n<7;n++){float left=70+n*(width+gap)+(n>=4?10:0),center=left+width/2;int color=n<4?BLUE:CORAL;
+            paint.setStyle(Paint.Style.FILL);paint.setColor(colors.card);paint.setAlpha(220);c.drawRoundRect(new RectF(left,605,left+width,675),7,7,paint);paint.setAlpha(255);line(c,left+8,608,left+width-8,608,color,2.3f,8200+n);
+            text(c,String.format(Locale.US,"%02d",n+1)+" · "+(n<4?"上午":"下午"),center,625,11,colors.muted,body,Paint.Align.CENTER);
+            String value=courses[n];paint.setTypeface(body);paint.setTextSize(17);if(paint.measureText(value)<=width-14){text(c,value,center,653,17,INK,body,Paint.Align.CENTER);}else{int split=value.indexOf('（');if(split<=0){split=value.length()/2;}String first=value.substring(0,split),second=value.substring(split);fitCourse(c,first,center,646,width-14);fitCourse(c,second,center,666,width-14);}
+        }
+    }
+    private void fitCourse(Canvas c,String value,float x,float y,float width){paint.setTypeface(body);paint.setTextSize(15);float size=Math.min(15,15*width/Math.max(1,paint.measureText(value)));text(c,value,x,y,size,INK,body,Paint.Align.CENTER);}
     private void updateForecast(CrayonWeather.Snapshot weather,Calendar date){
         boolean fresh=weather!=null&&weather.forecastFresh();
         if(forecastSnapshot==weather&&forecastDate.equals(paperDate)&&forecastFresh==fresh)return;

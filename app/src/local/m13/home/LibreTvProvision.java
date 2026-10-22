@@ -10,6 +10,8 @@ import org.json.JSONObject;
 public class LibreTvProvision extends BroadcastReceiver {
     public void onReceive(Context c,Intent i){
         try{
+            if("local.m13.home.SCREEN_TIMETABLE_CONFIG".equals(i.getAction())){CrayonTimetableStore.configure(c,new String(Base64.decode(i.getStringExtra("config"),Base64.DEFAULT),"UTF-8"));setResultCode(-1);setResultData(CrayonTimetableStore.status(c,System.currentTimeMillis()).toString());return;}
+            if("local.m13.home.SCREEN_TIMETABLE_STATUS".equals(i.getAction())){setResultCode(-1);setResultData(CrayonTimetableStore.status(c,i.getLongExtra("at",System.currentTimeMillis())).toString());return;}
             if("local.m13.home.AUTOSTART_STATUS".equals(i.getAction())){setResultCode(-1);setResultData(AutostartPolicy.diagnostics(c));return;}
             if("local.m13.home.AUTOSTART_CONFIG".equals(i.getAction())){java.util.Set<String> selected=new java.util.HashSet<String>();String names=i.getStringExtra("packages");if(names==null)throw new IllegalArgumentException("缺少应用列表");for(String name:names.split(","))if(!name.isEmpty())selected.add(name);AutostartPolicy.configure(c,selected);setResultCode(-1);setResultData(AutostartPolicy.diagnostics(c));return;}
             if("local.m13.home.AUTOSTART_LAUNCH".equals(i.getAction())){AutostartPolicy.launch(c,i.getStringExtra("package"));setResultCode(-1);setResultData(AutostartPolicy.diagnostics(c));return;}
