@@ -24,7 +24,7 @@ A native Java launcher developed on a MagicBox M13: video, music and casting on 
 
 <img src="docs/images/home-2.24.png" alt="轻桌面 2.24 实机首页，含轻音乐、影视和投屏入口 / Home with music, video and casting" width="100%" />
 
-*以下截图均为 2.24 在 M13 上的实际画面，拍摄于 2026-10-22。课程屏保使用示例内容，不含个人课表。Screenshots show 2.24 on M13; class names are demo data. Third-party app icons belong to their owners.*
+*首页、轻音乐及日夜对照图来自 2026-10-22 的 2.24 实机；下文周末规则图来自 2026-10-23 的 2.28。课程屏保使用示例内容，不含个人课表。M13 screenshots: home/music/day-night views are 2.24; the weekend-to-Monday example is 2.28. Class names are demo data. Third-party app icons belong to their owners.*
 
 ## 轻音乐 / Music on the box
 
