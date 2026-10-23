@@ -1,5 +1,13 @@
 # 验证范围 / Validation scope
 
+## 2.28
+
+2026-10-23 在 M13 安装 versionCode 42。周五的实际屏保显示“下周一课程 / 周一 · 10/26”和七节课，界面已检查。原有七天私人课表回读一致，保留现有影视网格和语音联动源码；这次没有重新验收全部语音流程。公开截图另用示例课程拍摄，拍摄后已恢复私人课表。
+
+Automated checks: 3,660 solar + 1,022 lyric + 44 timetable assertions passed (4,726 total), including Friday/Saturday/Sunday selection, ordinary weekdays and year boundaries. The raw daily status remains unchanged; `display` gives the effective screen selection. The speech engine remains an optional separate package.
+
+完整 APK SHA256: `93105f574d0384b37700db6559a67e264c357344a34a86ab3802edff7b054e33`.
+
 ## 2.24
 
 2026-10-22 在开发用 MagicBox M13 / Android API 22 安装 versionCode 38。系统实际屏保服务运行并绘制新增课程行；日间、夜间画面均已人工检查。七天课程配置回读匹配，恢复为日出日落自动配色，网易云私有账号会话跨更新仍有效。个人课表、实机课程截图与账号数据不随本仓库分发。

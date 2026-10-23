@@ -1,5 +1,12 @@
 # Changelog / 版本记录
 
+## 2.28 — Weekend course selection
+
+- Show the upcoming Monday from Friday through Sunday, with an explicit label and date.
+- Keep raw daily configuration reads separate from the effective display selection.
+- Preserve the existing newer grid/voice code and private timetable while applying this screen change.
+- Timetable date checks: 44 assertions passed, including weekend and year-boundary cases.
+
 ## 2.24 — Tomorrow's classes in the screensaver
 
 - Move and slightly reduce the calendar and weather region to make room for a horizontal seven-lesson row.

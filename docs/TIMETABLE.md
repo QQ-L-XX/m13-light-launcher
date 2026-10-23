@@ -1,8 +1,8 @@
 # 明日课程 / Tomorrow's classes
 
-2.24 在屏保下方增加横向七节课，1—4 节为上午，5—7 节为下午。每天按北京时间计算下一自然日；空课日显示暂无常规课程。周末可以配置课程或留空。调休、寒暑假及临时换课不会自动推断。
+屏保下方显示横向七节课，1—4 节为上午，5—7 节为下午。2.28 起，周一至周四显示次日课程；周五至周日直接显示下周一，标题为“下周一课程”，同时标出对应日期。按北京时间更新，调休、寒暑假及临时换课不会自动推断。
 
-Seven lessons are displayed below the calendar and weather. Tomorrow is calculated in Asia/Shanghai; the data is a repeating weekly timetable, not a school holiday calendar.
+Seven lessons are displayed below the calendar and weather. Monday through Thursday shows tomorrow; Friday through Sunday shows the upcoming Monday, with its actual date and an explicit label. The calendar uses Asia/Shanghai and a repeating weekly timetable, not a school holiday calendar. Raw timetable status remains available; its `display` field contains the effective screen selection.
 
 ## 配置 / Configuration
 

@@ -93,8 +93,8 @@ public final class CrayonView extends View {
         if(frames%900==1){CrayonWeather.refresh(getContext());AutostartPolicy.applyIfIdle(getContext());}
     }
     private void drawTimetable(Canvas c,Calendar date){
-        CrayonTimetable table=CrayonTimetableStore.read(getContext());if(table==null)return;CrayonTimetable.Day day=table.tomorrow(date.getTimeInMillis());String[] courses=day.courses();
-        text(c,"明日课程",70,591,18,INK,body,Paint.Align.LEFT);text(c,day.weekday+" · "+day.date.substring(5).replace('-','/'),173,591,14,ACCENT,hand,Paint.Align.LEFT);
+        CrayonTimetable table=CrayonTimetableStore.read(getContext());if(table==null)return;CrayonTimetable.Day day=table.display(date.getTimeInMillis());String[] courses=day.courses();
+        text(c,day.label,70,591,18,INK,body,Paint.Align.LEFT);text(c,day.weekday+" · "+day.date.substring(5).replace('-','/'),193,591,14,ACCENT,hand,Paint.Align.LEFT);
         if(courses.length==0){line(c,70,612,1208,612,ACCENT,2,8100);text(c,day.isoDay>=6?"周末 · 暂无常规课程":"明天暂无常规课程",639,651,20,colors.muted,body,Paint.Align.CENTER);return;}
         text(c,"上午 1—4 节  /  下午 5—7 节",1208,591,12,colors.muted,body,Paint.Align.RIGHT);
         float gap=10,width=(1138-gap*6-10)/7;

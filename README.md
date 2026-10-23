@@ -38,7 +38,7 @@ Search tracks and playlists, follow line lyrics, save favorites and resume liste
 
 日历和天气区上移，底部七节课程横向排列，区分上午与下午；明日日期按北京时间自动更新。日间是浅色纸张，夜间是深蓝底色，支持日出日落自动切换。以下课表仅用于展示，公开安装包不附带个人课程。
 
-A seven-lesson row separates morning and afternoon beneath the calendar and weather. Tomorrow rolls over in Asia/Shanghai; day and night palettes can follow sunrise and sunset. Both images below use the same sample timetable. [Configure your own classes](docs/TIMETABLE.md).
+A seven-lesson row separates morning and afternoon beneath the calendar and weather. The calendar uses Asia/Shanghai; day and night palettes can follow sunrise and sunset. Both images below use the same sample timetable. [Configure your own classes](docs/TIMETABLE.md).
 
 <table><tr><td width="50%"><img src="docs/images/timetable-day-demo-2.24.png" alt="日间课程屏保，示例课表 / Day screensaver with demo classes" /></td><td width="50%"><img src="docs/images/timetable-night-demo-2.24.png" alt="夜间课程屏保，示例课表 / Night screensaver with demo classes" /></td></tr><tr><td align="center">日间 · 示例课程 / Day · Demo classes</td><td align="center">夜间 · 示例课程 / Night · Demo classes</td></tr></table>
 
@@ -56,9 +56,13 @@ A seven-lesson row separates morning and afternoon beneath the calendar and weat
 
 日出日落在盒子离线计算，默认福州（26.0745°N, 119.2965°E），使用北京时间。天气通过 Open-Meteo 获取；太阳时刻为当地估算值，不能作为精密观测时间。Solar switching works offline; weather does not.
 
-屏保底部可显示明日课程：七节课横向排列，区分上午与下午，按北京时间跨日切换。课程表保存在盒子应用私有区，默认安装包不包含个人课程、姓名或班级；空课日显示暂无课程。按每周固定课表计算，调休及临时换课需另行更新。[课程配置 / Timetable configuration](docs/TIMETABLE.md). Personal timetables stay on-device and are not bundled in the public APK.
+屏保底部可显示课程：**周一至周四显示明天，周五至周日直接显示下周一**，标题明确标为“下周一课程”，并显示周一的实际日期。课程表保存在盒子应用私有区，默认安装包不包含个人课程、姓名或班级。按每周固定课表计算，调休及临时换课需另行更新。[课程配置 / Timetable configuration](docs/TIMETABLE.md). Monday–Thursday shows tomorrow; Friday–Sunday shows the upcoming Monday with an explicit label and date. Personal timetables stay on-device.
 
-当前公开版本 **2.24** 包含独立音乐、网易云账号登录、歌词校准与明日课程屏保。实机及构建检查见 [验证范围](docs/VALIDATION.md) 与 [音乐验证](docs/MUSIC-VALIDATION.md)。Version 2.24 includes standalone music, NetEase QR login, lyric calibration and the timetable screensaver.
+当前公开版本 **2.28** 新增周末显示下周一课程，保留独立音乐、网易云登录、歌词校准，以及现有影视网格与语音独立包的联动。语音引擎仍不包含在此 APK 中。实机及构建检查见 [验证范围](docs/VALIDATION.md) 与 [音乐验证](docs/MUSIC-VALIDATION.md)。Version 2.28 adds weekend-to-Monday classes and retains standalone music and the existing grid/optional voice integration; the speech engine is not bundled.
+
+<img src="docs/images/weekend-monday-demo-2.28.png" alt="2.28 周五显示下周一课程，使用示例课表 / Friday shows the upcoming Monday with demo classes" width="100%" />
+
+*2.28 实机示例，2026-10-23：周五直接显示 10 月 26 日周一，图中课程仅用于演示。On-device demo: Friday October 23 shows Monday October 26; course names are sample data.*
 
 ## 开始使用 / Quick start
 
@@ -68,7 +72,7 @@ A seven-lesson row separates morning and afternoon beneath the calendar and weat
 
 ```powershell
 adb devices -l
-adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.24.apk
+adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.28.apk
 adb -s <DEVICE_SERIAL> shell am start -n local.m13.home/.MainActivity
 ```
 

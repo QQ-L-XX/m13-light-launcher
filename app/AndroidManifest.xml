@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.m13.home" android:versionCode="38" android:versionName="2.24">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.m13.home" android:versionCode="42" android:versionName="2.28">
   <uses-permission android:name="local.m13.voice.PREWARM" />
   <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="22" />
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -28,6 +28,7 @@
     <activity android:name=".LibreTvActivity" android:exported="true" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
     <activity android:name=".LibreTvLibraryActivity" android:exported="true" android:launchMode="singleTop" android:windowSoftInputMode="stateAlwaysHidden|adjustNothing" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
     <receiver android:name=".LibreTvProvision" android:exported="true" android:permission="android.permission.DUMP" />
+    <receiver android:name=".VoiceControlReceiver" android:exported="true" android:permission="local.m13.voice.PREWARM" />
     <activity android:name=".MainActivity" android:label="轻桌面" android:exported="true" android:launchMode="singleTask" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

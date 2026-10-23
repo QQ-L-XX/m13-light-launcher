@@ -19,6 +19,9 @@ public final class M13TimetableChecks {
         String[] copy=table.tomorrow(at("2026-10-25 12:00")).courses();copy[0]="changed";ok(table.tomorrow(at("2026-10-25 12:00")).courses()[0].equals("D1-1"));
         try{new CrayonTimetable(new String[6][]);ok(false);}catch(IllegalArgumentException expected){ok(true);}
         week[0]=new String[]{"only one"};try{new CrayonTimetable(week);ok(false);}catch(IllegalArgumentException expected){ok(true);}
+        for(String d:new String[]{"2026-10-23 00:00","2026-10-24 12:00","2026-10-25 23:59"}){CrayonTimetable.Day show=table.display(at(d));ok(show.date.equals("2026-10-26"));ok(show.weekday.equals("周一"));ok(show.label.equals("下周一课程"));ok(show.courses()[0].equals("D1-1"));}
+        ok(table.display(at("2026-10-22 23:59")).date.equals("2026-10-23"));ok(table.display(at("2026-10-22 23:59")).label.equals("明日课程"));
+        ok(table.display(at("2027-01-01 12:00")).date.equals("2027-01-04"));ok(table.display(at("2026-10-26 00:00")).date.equals("2026-10-27"));
         System.out.println("Timetable date/rollover checks PASS: "+checks);
     }
 }
