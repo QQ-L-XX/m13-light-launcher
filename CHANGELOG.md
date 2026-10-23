@@ -1,5 +1,19 @@
 # Changelog / 版本记录
 
+## 2.30 — Home layout boundaries
+
+- Reduce hero whitespace when the home contains multiple card rows so a standard 720dp TV viewport can display two full rows.
+- Clip scrolling cards within their viewport to prevent labels overlapping the footer hint.
+- Read the installed version in the About dialog instead of showing an old hardcoded value.
+- Preserve the existing 2.29 optional voice dialogue changes. Installed on M13; home, lower-row focus and application scrolling inspected. Private course corrections, Monday display and NetEase authorization survived the update.
+
+## 2.29 — Page snapshots for offline dialogue
+
+- Expose page readiness, stage and current selection range to the local voice companion.
+- Preserve pending command tokens while the page is loading or applying a command.
+- Reject poster selections outside the captured visible screen.
+- Keep the 2.28 screensaver/course behavior and bundled assets. Tested with voice companion 2.5; user speech acceptance remains pending.
+
 ## 2.28 — Weekend course selection
 
 - Show the upcoming Monday from Friday through Sunday, with an explicit label and date.

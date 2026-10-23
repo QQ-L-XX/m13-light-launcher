@@ -113,6 +113,7 @@ public class MainActivity extends Activity {
     }
     private void build(){
         int theme=preferences.getInt("theme",0);
+        List<App> apps=applications();boolean compactHome=!allApps&&apps.size()+1>5;
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(56),dp(28),dp(56),dp(24));
         root.setBackground(BlueRedTheme.background(theme));root.setClipChildren(false);
         LinearLayout header=new LinearLayout(this);header.setGravity(Gravity.CENTER_VERTICAL);
@@ -128,11 +129,11 @@ public class MainActivity extends Activity {
         heroTitle=brand(allApps?"全部应用":"LibreTV",42);heroTitle.setTypeface(Typeface.create("sans-serif-light",Typeface.NORMAL));heroTitle.setSingleLine(true);heroTitle.setEllipsize(TextUtils.TruncateAt.END);
         heroSubtitle=text("电影 · 剧集 · 继续观看",14,BlueRedTheme.MUTED);
         hero.addView(heroTitle,new LinearLayout.LayoutParams(-1,dp(62)));hero.addView(heroSubtitle,new LinearLayout.LayoutParams(-1,dp(30)));
-        LinearLayout.LayoutParams heroParams=new LinearLayout.LayoutParams(-1,dp(allApps?105:132));heroParams.topMargin=dp(allApps?20:62);root.addView(hero,heroParams);
+        LinearLayout.LayoutParams heroParams=new LinearLayout.LayoutParams(-1,dp(allApps?105:compactHome?100:132));heroParams.topMargin=dp(allApps?20:compactHome?32:62);root.addView(hero,heroParams);
         TextView section=text(allApps?"应用库":"常用",12,BlueRedTheme.FAINT);root.addView(section,new LinearLayout.LayoutParams(-1,dp(28)));
-        ScrollView scroll=new ScrollView(this);scroll.setClipToPadding(false);scroll.setPadding(0,dp(8),0,dp(12));scroll.setVerticalScrollBarEnabled(false);
+        ScrollView scroll=new ScrollView(this);scroll.setClipToPadding(true);scroll.setClipChildren(true);scroll.setPadding(0,dp(8),0,dp(12));scroll.setVerticalScrollBarEnabled(false);
         GridLayout grid=new GridLayout(this);grid.setColumnCount(5);grid.setClipChildren(false);grid.setClipToPadding(false);
-        List<App> apps=applications();int width=(getResources().getDisplayMetrics().widthPixels-dp(112))/5-dp(16);
+        int width=(getResources().getDisplayMetrics().widthPixels-dp(112))/5-dp(16);
         View restore=null;
         for(int i=0;i<apps.size();i++){View card=addCard(grid,apps.get(i),i,width);if(apps.get(i).pkg.equals(focusedPackage))restore=card;}
         View more=addCard(grid,new App(allApps?"返回首页":"全部应用","__more__",null,null),apps.size(),width);
@@ -143,6 +144,7 @@ public class MainActivity extends Activity {
         if(restore!=null)restore.requestFocus();else if(grid.getChildCount()>0)grid.getChildAt(0).requestFocus();tickClock();
     }
     private void tickClock(){if(clock!=null)clock.setText(new SimpleDateFormat("HH:mm",Locale.CHINA).format(new Date()));if(date!=null)date.setText(new SimpleDateFormat("M月d日  EEE",Locale.CHINA).format(new Date()));}
+    private String appVersion(){try{return getPackageManager().getPackageInfo(getPackageName(),0).versionName;}catch(Exception e){return "";}}
     private TextView addNav(LinearLayout bar,String label,final boolean selected,final Runnable action){
         final TextView tab=text(label,14,selected?BlueRedTheme.BLUE:BlueRedTheme.MUTED);tab.setGravity(Gravity.CENTER);tab.setFocusable(true);tab.setClickable(true);
         tab.setBackground(surface(selected?0xff254d80:0,selected?0xff24416c:0,0));
@@ -197,7 +199,7 @@ public class MainActivity extends Activity {
                 if(which==3)homeKeySettings();
                 if(which==4)new AlertDialog.Builder(MainActivity.this).setTitle("恢复原系统桌面？").setMessage("重新显示原桌面包，清除轻桌面的默认主页设置，并解除本地设备管理。轻桌面和原有应用数据会保留。").setPositiveButton("恢复",new android.content.DialogInterface.OnClickListener(){public void onClick(android.content.DialogInterface dialog,int item){try{HomePolicy.restore(MainActivity.this);}catch(RuntimeException e){message("恢复未完成："+e.getMessage());}}}).setNegativeButton("取消",null).show();
                 if(which==6)autostartSettings();
-                if(which==5)message("轻桌面 2.18\n极简首页 · LibreTV · 投屏 · 蜡笔屏保\n影视与天气由盒子独立运行，无需电脑开机。\n\n"+(HomePolicy.active(MainActivity.this)?"已固定主页并管理系统广告。可以在设置中恢复原系统桌面。":"当前尚未完成默认主页配置。")+"\n长按应用可整理首页常用应用。");
+                if(which==5)message("轻桌面 "+appVersion()+"\n极简首页 · LibreTV · 轻音乐 · 投屏 · 课程屏保\n影视、音乐与天气由盒子独立运行，无需电脑开机。\n\n"+(HomePolicy.active(MainActivity.this)?"已固定主页并管理系统广告。可以在设置中恢复原系统桌面。":"当前尚未完成默认主页配置。")+"\n长按应用可整理首页常用应用。");
             }
         }).show();
     }

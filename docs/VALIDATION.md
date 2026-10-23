@@ -1,5 +1,13 @@
 # 验证范围 / Validation scope
 
+## 2.30
+
+2026-10-23 在开发用 M13 安装 versionCode 44。检查了默认首页、选中底部“全部应用”、进入应用页及向下滚动的实际画面；卡片不再遮挡“常用”，标签与页脚不再重叠。课表两处修正、下周一课程选择和网易云账号授权均保留。现有 2.29 语音联动源码保留，未重新验收全部语音流程。
+
+Full APK compilation/signature/ZIP checks passed. Regression checks: 3,660 solar + 1,022 lyric + 44 timetable assertions (4,726 total). Screenshots show the installed M13 layout; they do not establish compatibility with other screen sizes or every Android device.
+
+完整 APK SHA256: `e0b6afb39bc3238cb8c35fefb6fc4097099300f439700bb46d8dfe712504d5ba`.
+
 ## 2.28
 
 2026-10-23 在 M13 安装 versionCode 42。周五的实际屏保显示“下周一课程 / 周一 · 10/26”和七节课，界面已检查。原有七天私人课表回读一致，保留现有影视网格和语音联动源码；这次没有重新验收全部语音流程。公开截图另用示例课程拍摄，拍摄后已恢复私人课表。

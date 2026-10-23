@@ -22,9 +22,17 @@ A minimal TV home for video, music, casting and a crayon weather & class calenda
 
 A native Java launcher developed on a MagicBox M13: video, music and casting on the home screen, with a crayon calendar, two-day weather and tomorrow's classes during idle time. It runs on the box without a PC server; online media and weather require internet. This is an independent community adaptation, not an official LibreTV, Apple, NetEase or Tmall product.
 
-<img src="docs/images/home-2.24.png" alt="轻桌面 2.24 实机首页，含轻音乐、影视和投屏入口 / Home with music, video and casting" width="100%" />
+<img src="docs/images/home-2.30.png" alt="轻桌面 2.30 实机首页，两行卡片与底部提示分开显示 / Two-row home with a separate footer" width="100%" />
 
-*首页、轻音乐及日夜对照图来自 2026-10-22 的 2.24 实机；下文周末规则图来自 2026-10-23 的 2.28。课程屏保使用示例内容，不含个人课表。M13 screenshots: home/music/day-night views are 2.24; the weekend-to-Monday example is 2.28. Class names are demo data. Third-party app icons belong to their owners.*
+*首页、焦点和应用页截图为 2026-10-23 的 2.30 实机；轻音乐及日夜屏保对照图为 2.24，周末规则图为 2.28。课表均为示例，不含私人课程。M13 screenshots: home/focus/apps are 2.30, music/day-night views are 2.24, and the weekend example is 2.28. Timetables use demo data. Third-party app icons belong to their owners.*
+
+## 2.30 界面修复 / Home layout fixes
+
+两行卡片的首页缩短顶部留白，“全部应用”文字与底部提示各有独立空间；向下移动焦点或滚动应用页时，卡片不会越过滚动区域盖住“常用”或页脚。“关于轻桌面”读取实际安装版本，保留现有影视、轻音乐、投屏和周末课程功能。
+
+The two-row home uses less header whitespace. Card labels stay separate from the footer, and focus movement or scrolling stays within the card viewport. About displays the installed version. Existing video, music, casting and weekend-to-Monday classes are retained.
+
+<table><tr><td width="50%"><img src="docs/images/home-focus-bottom-2.30.png" alt="2.30 选中底部全部应用，文字与提示不重叠 / Lower-row focus without overlap" /></td><td width="50%"><img src="docs/images/apps-2.30.png" alt="2.30 应用页，卡片和底部提示独立显示 / Apps grid with a separate footer" /></td></tr><tr><td align="center">底部焦点 / Lower-row focus</td><td align="center">应用页 / Apps</td></tr></table>
 
 ## 轻音乐 / Music on the box
 
@@ -58,7 +66,7 @@ A seven-lesson row separates morning and afternoon beneath the calendar and weat
 
 屏保底部可显示课程：**周一至周四显示明天，周五至周日直接显示下周一**，标题明确标为“下周一课程”，并显示周一的实际日期。课程表保存在盒子应用私有区，默认安装包不包含个人课程、姓名或班级。按每周固定课表计算，调休及临时换课需另行更新。[课程配置 / Timetable configuration](docs/TIMETABLE.md). Monday–Thursday shows tomorrow; Friday–Sunday shows the upcoming Monday with an explicit label and date. Personal timetables stay on-device.
 
-当前公开版本 **2.28** 新增周末显示下周一课程，保留独立音乐、网易云登录、歌词校准，以及现有影视网格与语音独立包的联动。语音引擎仍不包含在此 APK 中。实机及构建检查见 [验证范围](docs/VALIDATION.md) 与 [音乐验证](docs/MUSIC-VALIDATION.md)。Version 2.28 adds weekend-to-Monday classes and retains standalone music and the existing grid/optional voice integration; the speech engine is not bundled.
+当前公开版本 **2.30** 修复首页、卡片焦点及页脚重叠，保留周末显示下周一课程、独立音乐、网易云登录、歌词校准，以及现有影视网格与语音独立包联动。语音引擎仍不包含在此 APK 中。实机及构建检查见 [验证范围](docs/VALIDATION.md) 与 [音乐验证](docs/MUSIC-VALIDATION.md)。Version 2.30 fixes home/focus/footer layout while retaining the existing media, timetable and optional voice integration; the speech engine is not bundled.
 
 <img src="docs/images/weekend-monday-demo-2.28.png" alt="2.28 周五显示下周一课程，使用示例课表 / Friday shows the upcoming Monday with demo classes" width="100%" />
 
@@ -72,7 +80,7 @@ A seven-lesson row separates morning and afternoon beneath the calendar and weat
 
 ```powershell
 adb devices -l
-adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.28.apk
+adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.30.apk
 adb -s <DEVICE_SERIAL> shell am start -n local.m13.home/.MainActivity
 ```
 

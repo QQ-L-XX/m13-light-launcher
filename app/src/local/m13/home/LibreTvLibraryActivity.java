@@ -29,21 +29,23 @@ public class LibreTvLibraryActivity extends Activity {
     private final ArrayList<JSONObject> voiceRows=new ArrayList<JSONObject>();private JSONObject lastVoiceCommand=new JSONObject();
     public static String voiceContext()throws Exception{
         LibreTvLibraryActivity a=active.get();if(a==null||!a.voiceVisible||a.destroyed||a.isFinishing())return null;
+        if(a.busy||a.voiceQueued)return new JSONObject().put("busy",true).put("dialogueProtocol",1).put("stage","loading").put("query",a.searchWord).toString();
         a.voiceToken=UUID.randomUUID().toString();a.voiceSnapshotAt=SystemClock.elapsedRealtime();a.snapshotGeneration=a.generation;a.voiceConsumed=false;a.voiceQueued=false;a.voiceRows.clear();a.snapshotDialog=null;
         if(a.voiceDialog!=null&&a.voiceDialog.isShowing()&&(a.dialogStage.equals("sources")||a.dialogStage.equals("episodes"))){a.snapshotStage=a.dialogStage;a.snapshotDialog=a.voiceDialog;}
         else{a.snapshotStage=a.mode.equals("search")?"results":"navigation";if(a.snapshotStage.equals("results"))for(JSONObject row:a.items)a.voiceRows.add(new JSONObject(row.toString()));}
         int count=a.snapshotDialog==null?a.voiceRows.size():a.snapshotDialog.getListView().getCount();
         a.snapshotColumns=a.snapshotStage.equals("results")?a.grid.getNumColumns():1;a.snapshotFirst=a.snapshotStage.equals("results")?Math.max(0,a.grid.getFirstVisiblePosition()):0;
         a.snapshotVisible=a.snapshotStage.equals("results")?Math.max(0,Math.min(count,a.grid.getLastVisiblePosition()+1)-a.snapshotFirst):count;
-        return new JSONObject().put("token",a.voiceToken).put("stage",a.snapshotStage).put("count",count).put("columns",a.snapshotColumns).put("firstVisible",a.snapshotFirst).put("visibleCount",a.snapshotVisible).toString();
+        return new JSONObject().put("token",a.voiceToken).put("stage",a.snapshotStage).put("count",count).put("columns",a.snapshotColumns).put("firstVisible",a.snapshotFirst).put("visibleCount",a.snapshotVisible).put("busy",a.busy||a.voiceQueued).put("query",a.searchWord).put("dialogueProtocol",1).toString();
     }
     private String validateVoice(Intent i){
         if(destroyed||isFinishing()||voiceConsumed||!voiceToken.equals(i.getStringExtra("token"))||voiceToken.isEmpty()||SystemClock.elapsedRealtime()-voiceSnapshotAt>60000)return "操作已过期，请重新唤醒";
         if(generation!=snapshotGeneration||(snapshotDialog!=null&&(!snapshotDialog.isShowing()||!snapshotStage.equals(dialogStage)))||(snapshotDialog==null&&voiceDialog!=null&&voiceDialog.isShowing()))return "页面已变化，请重新唤醒后选择";
-        String action=i.getStringExtra("action");if("back".equals(action))return null;if(!"open".equals(action))return "不支持这个操作";
+        String action=i.getStringExtra("action");if("back".equals(action))return null;if(!"open".equals(action))return "不支持这个操作";if(busy)return "页面还在加载，请稍后再选择";
         int count=snapshotDialog==null?voiceRows.size():snapshotDialog.getListView().getCount(),index=i.getIntExtra("index",0);
         int row=i.getIntExtra("row",0),column=i.getIntExtra("column",0);
         if(row!=0||column!=0){int offset=(row-1)*snapshotColumns+column-1;if(row<1||column<1||column>snapshotColumns||offset<0||offset>=snapshotVisible||index!=snapshotFirst+offset+1)return "这个位置不在当前屏幕上，请重新选择";}
+        else if(snapshotStage.equals("results")&&(index<=snapshotFirst||index>snapshotFirst+snapshotVisible))return "这个编号不在当前屏幕上，请重新选择";
         return index<1||index>count?(count==0?"当前没有可选择的结果":"当前只有 "+count+" 项，请重新说编号"):null;
     }
     public static String queueVoiceCommand(Context c,Intent i){
