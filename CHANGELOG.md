@@ -1,5 +1,26 @@
 # Changelog / 版本记录
 
+## 2.33 — TV settings, music controls and local recovery
+
+- Add four overscan margins without cropping media surfaces; preserve the TV layout proportions.
+- Make grid edge navigation explicit and return from nested settings pages without losing the home position. Keep the music keyboard hidden until the user edits search.
+- Add sequential, repeat-one and shuffle playback, sleep pause timers, and retry actions for music/search.
+- Edit weekly courses with a remote, add date-specific replacements or holidays, and show the next applicable school day.
+- Clarify casting states and stop casting on Back while returning to the previous activity.
+- Keep stale weather visible with a cache label and observation timestamp; retry online music without restarting the app.
+- Back up selected display/home/course preferences locally, restore after validation, and retain a pre-restore undo snapshot. Account credentials and device administration are excluded. File export/import uses the system document picker when present; this M13 has no DocumentsUI, so local backup is the verified route.
+- Read public GitHub release notes on the box; only offer newer stable versions. Download code validates byte count, SHA-256, package name, signing certificate and version code before opening the system installer. Keep the current APK for recovery; Android may refuse downgrades.
+- M13 validation: margins, unchanged course save, holiday skip/removal, local settings save/change/restore, background one-minute sleep pause, shuffle selection, DLNA video decoding and Back returning to the unchanged home focus, GitHub metadata and system installer opening. A newer published APK is not yet available for a full updater download/install trial. Automated checks: 5,196 assertions passed.
+
+## 2.32 — Focus, home order and fullscreen music
+
+- Make the focused TV card clearer with a thin bright border, a slight scale change and a bold label.
+- Add remote-friendly home ordering through the app long-press menu: pin first, move earlier or move later. The full app library keeps its alphabetical order.
+- Retain each page's focus and scroll position when returning from an app; rebuild only when app availability or the layout changes.
+- Add four persistent lyric sizes and a minimal fullscreen music player using the existing on-device playback service.
+- Preserve the installed 2.31 voice command result acknowledgements and detail-loading feedback.
+- Verified on M13: move/restore home order, home return without rebuilding, app-library return with the same focus and scroll position, lyric size persistence, fullscreen playback and pause/resume. Automated checks: 4,738 assertions passed. TV sound quality was not re-confirmed by the user in this update.
+
 ## 2.30 — Home layout boundaries
 
 - Reduce hero whitespace when the home contains multiple card rows so a standard 720dp TV viewport can display two full rows.

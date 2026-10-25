@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.m13.home" android:versionCode="44" android:versionName="2.30">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.m13.home" android:versionCode="47" android:versionName="2.33">
   <uses-permission android:name="local.m13.voice.PREWARM" />
   <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="22" />
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -16,7 +16,11 @@
   <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
   <uses-permission android:name="android.permission.WRITE_SETTINGS" />
   <application android:label="轻桌面" android:theme="@android:style/Theme.Material.NoActionBar.Fullscreen" android:allowBackup="false" android:hardwareAccelerated="true">
-    <activity android:name=".MusicActivity" android:exported="true" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
+    <provider android:name=".LauncherPackageProvider" android:authorities="local.m13.home.packages" android:exported="false" android:grantUriPermissions="true" />
+    <activity android:name=".LauncherSettingsActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
+    <activity android:name=".LauncherUpdateActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
+    <activity android:name=".MusicPlayerActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
+    <activity android:name=".MusicActivity" android:windowSoftInputMode="stateAlwaysHidden|adjustNothing" android:exported="true" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
     <service android:name=".MusicService" android:exported="false" />
     <receiver android:name=".MusicDiagnostics" android:exported="true" android:permission="android.permission.DUMP" />
     <activity android:name=".CrayonActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />

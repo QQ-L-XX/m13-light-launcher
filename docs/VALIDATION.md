@@ -1,5 +1,15 @@
 # 验证范围 / Validation scope
 
+## 2.33
+
+2026-10-25 在 M13 / Android API 22 安装 versionCode 47。已检查电视边距、首页顺序、应用页滚动及焦点保留、课程编辑和临时放假跳转、设置保存／修改／恢复、后台一分钟定时暂停、随机切歌，以及投屏视频解码后按返回回到原首页焦点。原七天课程及网易云授权保留。截图改用示例课程拍摄，之后回读七天课程及日夜模式，确认已恢复。
+
+Automated assertions: 3,660 solar + 1,022 lyric + 44 timetable + 12 home-order + 458 queue/holiday/version = **5,196 PASS**. Full APK ZIP/signature validation passed; the device used a same-code update APK after verifying its existing title database. Fresh installation of the full APK, every source, and other Android devices are not newly accepted by these checks.
+
+GitHub 正式版发现、旧版下载阻止和系统安装确认页已验证；完整下载并升级到更高公开版本仍待后续版本。原系统没有 DocumentsUI，文件选择器导出未跑通，本机备份恢复已验证。定时暂停使用盒子本地播放服务，不需要电脑。投屏测试使用局域网测试视频，不等同于所有手机 App 的验收。用户尚未重新验收本次声音质量。
+
+Full APK SHA256: `b3277de6420f8f6d841970e2f66ceff174c429d34c294e3f76a82c7c800fa083`.
+
 ## 2.30
 
 2026-10-23 在开发用 M13 安装 versionCode 44。检查了默认首页、选中底部“全部应用”、进入应用页及向下滚动的实际画面；卡片不再遮挡“常用”，标签与页脚不再重叠。课表两处修正、下周一课程选择和网易云账号授权均保留。现有 2.29 语音联动源码保留，未重新验收全部语音流程。

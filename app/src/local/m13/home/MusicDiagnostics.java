@@ -7,7 +7,8 @@ import org.json.*;
 public final class MusicDiagnostics extends BroadcastReceiver {
     public void onReceive(Context c,Intent i){try{
         NeteaseAccount.init(c);String action=i.getStringExtra("command");
-        if("select".equals(action))MusicActivity.testSelect(i.getIntExtra("index",0));
+        if("sleep".equals(action)){MusicService m=MusicService.current();if(m!=null)m.setSleep(i.getIntExtra("minutes",0));}
+        else if("select".equals(action))MusicActivity.testSelect(i.getIntExtra("index",0));
         else if("search".equals(action))MusicActivity.testSearch(i.getStringExtra("query"),i.getStringExtra("source"),i.getBooleanExtra("playlists",false));
         else if("seek".equals(action)){MusicService m=MusicService.current();if(m!=null)m.seek(i.getIntExtra("position",0));}
         else if("toggle".equals(action)||"next".equals(action)||"previous".equals(action)||"stop".equals(action))MusicService.command(c,action);

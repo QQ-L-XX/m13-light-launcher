@@ -16,3 +16,8 @@ subprocess.run([tool('javac'),'-encoding','UTF-8','-d',str(dest),str(root/'app/s
 subprocess.run([tool('java'),'-cp',str(dest),'M13MusicChecks'],check=True)
 subprocess.run([tool('javac'),'-encoding','UTF-8','-d',str(dest),str(root/'app/src/local/m13/home/CrayonTimetable.java'),str(root/'tests/M13TimetableChecks.java')],check=True)
 subprocess.run([tool('java'),'-cp',str(dest),'M13TimetableChecks'],check=True)
+subprocess.run([tool('javac'),'-encoding','UTF-8','-d',str(dest),str(root/'app/src/local/m13/home/HomeOrder.java'),str(root/'tests/M13HomeOrderChecks.java')],check=True)
+subprocess.run([tool('java'),'-cp',str(dest),'M13HomeOrderChecks'],check=True)
+
+subprocess.run([tool('javac'),'-encoding','UTF-8','-cp',str(dest),'-d',str(dest),*[str(root/'app/src/local/m13/home'/name) for name in ['MusicQueuePolicy.java','UpdateVersion.java']],str(root/'tests/M13FeatureChecks.java')],check=True)
+subprocess.run([tool('java'),'-cp',str(dest),'M13FeatureChecks'],check=True)

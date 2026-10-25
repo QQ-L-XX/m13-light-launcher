@@ -10,6 +10,10 @@ import org.json.JSONObject;
 public class LibreTvProvision extends BroadcastReceiver {
     public void onReceive(Context c,Intent i){
         try{
+            if("local.m13.home.SETTINGS_OPEN".equals(i.getAction())){c.startActivity(new Intent(c,"update".equals(i.getStringExtra("page"))?LauncherUpdateActivity.class:LauncherSettingsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));setResultCode(-1);setResultData("Opened");return;}
+            if("local.m13.home.FEATURE_STATUS".equals(i.getAction())){JSONObject backup=LauncherBackup.export(c);LauncherBackup.validate(backup);JSONObject timetable=CrayonTimetableStore.config(c);setResultCode(-1);setResultData(new JSONObject().put("safeMargin",TvUi.margin(c)).put("backupValid",true).put("backupPresent",new java.io.File(c.getFilesDir(),"settings-backup.json").isFile()).put("holidays",timetable.optJSONArray("holidays")==null?0:timetable.getJSONArray("holidays").length()).put("overrides",timetable.optJSONObject("overrides")==null?0:timetable.getJSONObject("overrides").length()).put("update",LauncherUpdateActivity.diagnostics()).toString());return;}
+
+            if("local.m13.home.HOME_STATUS".equals(i.getAction())){setResultCode(-1);setResultData(MainActivity.diagnostics().toString());return;}
             if("local.m13.home.SCREEN_TIMETABLE_CONFIG".equals(i.getAction())){CrayonTimetableStore.configure(c,new String(Base64.decode(i.getStringExtra("config"),Base64.DEFAULT),"UTF-8"));setResultCode(-1);setResultData(CrayonTimetableStore.status(c,System.currentTimeMillis()).toString());return;}
             if("local.m13.home.SCREEN_TIMETABLE_STATUS".equals(i.getAction())){setResultCode(-1);setResultData(CrayonTimetableStore.status(c,i.getLongExtra("at",System.currentTimeMillis())).toString());return;}
             if("local.m13.home.AUTOSTART_STATUS".equals(i.getAction())){setResultCode(-1);setResultData(AutostartPolicy.diagnostics(c));return;}

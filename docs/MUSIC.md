@@ -31,3 +31,17 @@ Search, playlist metadata, lyrics and media URL resolution run directly on the b
 这是盒子独立的音乐客户端，不提供全部平台或全部歌曲可播的承诺。直接接口可能变化。酷我在权限字段缺失时也不会擅自认为可免费播放。酷我账号登录、云同步、下载、逐字卡拉 OK 和本地文件浏览不在此版范围。2.23.3 已在 M13 验证扫码授权、私有会话保存及账号歌曲播放；详见 MUSIC-VALIDATION.md。
 
 Full tracks are accepted only when the provider supplies a usable stream without a declared preview restriction. Shortened streams inconsistent with track duration are rejected. Availability is controlled by the provider; this module does not unlock paid music.
+
+
+## 2.32：歌词字号与全屏 / Lyric size and fullscreen
+
+播放区点击“歌词字号”可选择小、标准、大、超大，选择会保存在盒子上，列表与全屏共用。“全屏播放”保留歌曲名、三行歌词、进度及上一首／暂停／下一首；选择“返回列表”或按返回键可回到搜索列表，播放继续由原有服务负责。
+
+Choose one of four lyric sizes from the player; the preference is stored on the box and shared with fullscreen mode. Fullscreen keeps the title, lyric context, seek bar and playback controls. Returning to the list retains the current playback service.
+
+
+## 2.33：播放模式与睡眠定时 / Playback modes and sleep pause
+
+列表左下角或全屏右上角选择“播放设置”。顺序播放在列表结束后停止；单曲循环只影响自动播完，手动下一首仍切歌；随机播放在多首歌曲时避开立即重复同一首。睡眠定时支持 15、30、60、90 分钟，到时暂停音乐，不关闭电视。服务或设备重启后定时不保留。失败时可重试当前歌曲或重试搜索。
+
+Playback settings provide sequential, repeat-one and shuffle modes. Sleep timers pause music after 15/30/60/90 minutes; they do not power off the TV and do not persist across service/device restarts. Retry controls are available for a failed track or search.

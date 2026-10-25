@@ -73,22 +73,22 @@ public final class CrayonView extends View {
         SimpleDateFormat key=new SimpleDateFormat("yyyyMMdd",Locale.US);key.setTimeZone(zone);paperDate=key.format(date.getTime());
     }
     protected void onDraw(Canvas canvas){super.onDraw(canvas);frames++;refreshAppearance();Calendar date=now();SimpleDateFormat dayKey=new SimpleDateFormat("yyyyMMdd",Locale.US);dayKey.setTimeZone(zone);if(paper==null||!paperDate.equals(dayKey.format(date.getTime())))paper(date);
-        float scale=Math.min(getWidth()/1280f,getHeight()/720f);int saved=canvas.save();canvas.translate((getWidth()-1280*scale)/2,(getHeight()-720*scale)/2);canvas.scale(scale,scale);
+        float scale=Math.min(getWidth()/1280f,getHeight()/720f)*(1f-TvUi.margin(getContext())*.025f);int saved=canvas.save();canvas.translate((getWidth()-1280*scale)/2,(getHeight()-720*scale)/2);canvas.scale(scale,scale);
         double t=(SystemClock.elapsedRealtime()-started)/1000d;canvas.translate((float)Math.sin(t/43)*4,(float)Math.cos(t/53)*2);
         paint.setAlpha(255);canvas.drawBitmap(paper,0,0,paint);
         int weatherLayer=canvas.save();canvas.translate(965,-10);canvas.scale(.90f,.86f);canvas.translate(-965,0);
         SimpleDateFormat clock=new SimpleDateFormat("HH:mm",Locale.US);clock.setTimeZone(zone);text(canvas,clock.format(date.getTime()),965,179,84,INK,hand,Paint.Align.CENTER);
         String[] days={"星期日","星期一","星期二","星期三","星期四","星期五","星期六"};text(canvas,days[date.get(Calendar.DAY_OF_WEEK)-1],965,214,17,colors.muted,body,Paint.Align.CENTER);
-        CrayonWeather.Snapshot weather=CrayonWeather.get();boolean available=weather!=null&&weather.fresh();int code=available?weather.code:3;boolean daytime=!available||weather.day;
+        CrayonWeather.Snapshot weather=CrayonWeather.get();boolean available=weather!=null;int code=available?weather.code:3;boolean daytime=!available||weather.day;
         weather(canvas,965,342,code,daytime,t);
         String temperature=available?Math.round(weather.temperature)+"°":"--°";text(canvas,temperature,965,521,101,INK,hand,Paint.Align.CENTER);
-        text(canvas,available?CrayonWeather.label(code):weather==null?"正在更新天气":"天气需要更新",965,558,23,INK,body,Paint.Align.CENTER);
+        text(canvas,available?CrayonWeather.label(code)+(weather.fresh()?"":" · 缓存"):"联网后获取天气",965,558,23,INK,body,Paint.Align.CENTER);
         updateForecast(weather,date);
         if(available&&!todayRange.isEmpty())text(canvas,"今天 "+todayRange,965,596,25,ACCENT,hand,Paint.Align.CENTER);
         plainLine(canvas,839,617,1091,617,colors.binding,1);
         drawTomorrow(canvas);
         canvas.restoreToCount(weatherLayer);
-        String stamp=weather==null?"天气 open-meteo.com · 等待联网更新":"天气 open-meteo.com · "+weather.asOf.replace('T',' ')+(CrayonWeather.error().isEmpty()?"":" · 更新暂不可用");text(canvas,stamp,1208,693,11,colors.muted,body,Paint.Align.RIGHT);
+        String stamp=weather==null?"天气 open-meteo.com · 等待联网更新":"天气 open-meteo.com · "+weather.asOf.replace('T',' ')+(!weather.fresh()?" · 缓存 / 待更新":CrayonWeather.error().isEmpty()?"":" · 更新暂不可用");text(canvas,stamp,1208,693,11,colors.muted,body,Paint.Align.RIGHT);
         canvas.restoreToCount(saved);
         if(frames%900==1){CrayonWeather.refresh(getContext());AutostartPolicy.applyIfIdle(getContext());}
     }
@@ -109,7 +109,7 @@ public final class CrayonView extends View {
         boolean fresh=weather!=null&&weather.forecastFresh();
         if(forecastSnapshot==weather&&forecastDate.equals(paperDate)&&forecastFresh==fresh)return;
         forecastSnapshot=weather;forecastDate=paperDate;forecastFresh=fresh;todayRange="";tomorrowCode=-1;tomorrowText=weather==null?"明天 · 预报更新中":"明天 · 预报待更新";
-        if(weather!=null){CrayonWeather.Forecast today=weather.forDate(CrayonWeather.dateOffset(date.getTimeInMillis(),0)),tomorrow=weather.forDate(CrayonWeather.dateOffset(date.getTimeInMillis(),1));if(today!=null)todayRange=today.range();if(fresh&&tomorrow!=null){tomorrowText=tomorrow.summary();tomorrowCode=tomorrow.code;}}
+        if(weather!=null){CrayonWeather.Forecast today=weather.forDate(CrayonWeather.dateOffset(date.getTimeInMillis(),0)),tomorrow=weather.forDate(CrayonWeather.dateOffset(date.getTimeInMillis(),1));if(today!=null)todayRange=today.range();if(tomorrow!=null){tomorrowText=tomorrow.summary()+(fresh?"":" · 缓存");tomorrowCode=tomorrow.code;}}
     }
     private void drawTomorrow(Canvas c){
         if(tomorrowCode<0){text(c,tomorrowText,965,649,18,colors.muted,body,Paint.Align.CENTER);return;}

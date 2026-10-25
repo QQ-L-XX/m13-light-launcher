@@ -33,6 +33,15 @@ import java.util.Locale;
 public class MainActivity extends Activity {
     private final Handler handler=new Handler();
     private SharedPreferences preferences;
+    private static java.lang.ref.WeakReference<MainActivity> live=new java.lang.ref.WeakReference<MainActivity>(null);
+    private ScrollView pageScroll;private LinearLayout rootView;private boolean renderedAllApps,appsDirty=true;private int homeY,appsY,buildCount;
+    private int settingsHash;
+    private String homeFocus,appsFocus;private boolean movingOrder;
+    private final android.content.BroadcastReceiver packageChanges=new android.content.BroadcastReceiver(){public void onReceive(android.content.Context c,Intent i){appsDirty=true;}};
+    private void rememberPage(){if(pageScroll!=null){if(renderedAllApps)appsY=pageScroll.getScrollY();else homeY=pageScroll.getScrollY();}}
+    private void switchPage(boolean target){if(allApps==target&&rootView!=null)return;allApps=target;build();}
+    private GradientDrawable focusedSurface(){GradientDrawable d=BlueRedTheme.focus(dp(15));d.setStroke(dp(2),BlueRedTheme.TEXT);return d;}
+
     private TextView clock,date,heroTitle,heroSubtitle,cleanButton;
     private boolean allApps;
     private String focusedPackage;
@@ -42,7 +51,10 @@ public class MainActivity extends Activity {
     private final Runnable restrictIdle=new Runnable(){public void run(){AutostartPolicy.applyIfIdle(MainActivity.this);handler.postDelayed(this,30000);}};
 
     public void onCreate(Bundle saved){
-        super.onCreate(saved);
+        super.onCreate(saved);live=new java.lang.ref.WeakReference<MainActivity>(this);
+        android.content.IntentFilter changes=new android.content.IntentFilter();changes.addAction(Intent.ACTION_PACKAGE_ADDED);changes.addAction(Intent.ACTION_PACKAGE_REMOVED);changes.addAction(Intent.ACTION_PACKAGE_CHANGED);changes.addDataScheme("package");registerReceiver(packageChanges,changes);
+        if(saved!=null){allApps=saved.getBoolean("allApps",false);homeFocus=saved.getString("homeFocus");appsFocus=saved.getString("appsFocus");homeY=saved.getInt("homeY",0);appsY=saved.getInt("appsY",0);}
+
         preferences=getSharedPreferences("home",MODE_PRIVATE);
         if(!preferences.getBoolean("layout_24",false))preferences.edit().putBoolean("layout_24",true).putInt("theme",1).apply();
         if(!preferences.getBoolean("blue_red_29",false))preferences.edit().putBoolean("blue_red_29",true).putInt("theme",0).apply();
@@ -52,11 +64,12 @@ public class MainActivity extends Activity {
         if(preferences.getBoolean("home_key_enabled",false))startService(new Intent(this,HomeKeyService.class));
         else stopService(new Intent(this,HomeKeyService.class));
     }
-    protected void onResume(){super.onResume();ScreenPolicy.applyWindow(this);build();handler.removeCallbacks(tick);handler.post(tick);handler.removeCallbacks(restrictIdle);handler.postDelayed(restrictIdle,20000);}
-    protected void onPause(){handler.removeCallbacks(restrictIdle);handler.removeCallbacks(tick);super.onPause();}
-    protected void onDestroy(){handler.removeCallbacks(restrictIdle);handler.removeCallbacks(tick);super.onDestroy();}
-    public void onNewIntent(Intent intent){super.onNewIntent(intent);ScreenPolicy.applyWindow(this);HomePolicy.applyIfOwner(this);allApps=false;focusedPackage=null;build();}
-    public void onBackPressed(){if(allApps){allApps=false;focusedPackage=null;build();}}
+    protected void onResume(){super.onResume();ScreenPolicy.applyWindow(this);if(rootView==null||appsDirty||settingsHash!=preferences.getAll().hashCode())build();else tickClock();handler.removeCallbacks(tick);handler.post(tick);handler.removeCallbacks(restrictIdle);handler.postDelayed(restrictIdle,20000);}
+    protected void onPause(){rememberPage();handler.removeCallbacks(restrictIdle);handler.removeCallbacks(tick);super.onPause();}
+    protected void onDestroy(){unregisterReceiver(packageChanges);if(live.get()==this)live.clear();handler.removeCallbacks(restrictIdle);handler.removeCallbacks(tick);super.onDestroy();}
+    public void onNewIntent(Intent intent){super.onNewIntent(intent);ScreenPolicy.applyWindow(this);HomePolicy.applyIfOwner(this);if(allApps)switchPage(false);else if(rootView==null||appsDirty)build();}
+    protected void onSaveInstanceState(Bundle out){rememberPage();super.onSaveInstanceState(out);out.putBoolean("allApps",allApps);out.putString("homeFocus",homeFocus);out.putString("appsFocus",appsFocus);out.putInt("homeY",homeY);out.putInt("appsY",appsY);}
+    public void onBackPressed(){if(allApps)switchPage(false);}
     private int dp(float n){return(int)(getResources().getDisplayMetrics().density*n+0.5f);}
     private TextView text(String value,int size,int color){
         TextView t=new TextView(this);t.setText(value);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.CENTER_VERTICAL);return t;
@@ -97,7 +110,8 @@ public class MainActivity extends Activity {
         for(String wanted:defaults)for(App app:apps)if(app.pkg.equals(wanted)&&!preferences.getBoolean("hidden:"+app.pkg,false))home.add(app);
         if(!preferences.getBoolean("hidden:__cast__",false))home.add(cast);
         for(App app:apps)if(preferences.getBoolean("favorite:"+app.pkg,false)&&!preferences.getBoolean("hidden:"+app.pkg,false)&&!home.contains(app))home.add(app);
-        return home;
+        List<String> ids=new ArrayList<String>(),savedOrder=new ArrayList<String>();java.util.Map<String,App> byId=new LinkedHashMap<String,App>();for(App app:home){ids.add(app.pkg);byId.put(app.pkg,app);}try{org.json.JSONArray order=new org.json.JSONArray(preferences.getString("home_order_v1","[]"));for(int n=0;n<order.length();n++)savedOrder.add(order.getString(n));}catch(Exception ignored){}
+        List<App> sorted=new ArrayList<App>();for(String id:HomeOrder.arrange(ids,savedOrder))sorted.add(byId.get(id));return sorted;
     }
     private String description(App app){
         if(AutostartPolicy.managed(this,app.pkg))return "按需启动 · 点开即可使用";
@@ -112,6 +126,7 @@ public class MainActivity extends Activity {
         return "确认打开 · 长按整理";
     }
     private void build(){
+        rememberPage();focusedPackage=allApps?appsFocus:homeFocus;buildCount++;appsDirty=false;settingsHash=preferences.getAll().hashCode();
         int theme=preferences.getInt("theme",0);
         List<App> apps=applications();boolean compactHome=!allApps&&apps.size()+1>5;
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(56),dp(28),dp(56),dp(24));
@@ -119,8 +134,8 @@ public class MainActivity extends Activity {
         LinearLayout header=new LinearLayout(this);header.setGravity(Gravity.CENTER_VERTICAL);
         TextView brand=brand("轻桌面",20);brand.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
         header.addView(brand,new LinearLayout.LayoutParams(0,dp(44),1));
-        addNav(header,"首页",!allApps,new Runnable(){public void run(){allApps=false;focusedPackage=null;build();}});
-        addNav(header,"应用",allApps,new Runnable(){public void run(){allApps=true;focusedPackage=null;build();}});
+        addNav(header,"首页",!allApps,new Runnable(){public void run(){switchPage(false);}});
+        addNav(header,"应用",allApps,new Runnable(){public void run(){switchPage(true);}});
         addNav(header,"语音搜片",false,new Runnable(){public void run(){try{startActivity(new Intent().setClassName("local.m13.voice","local.m13.voice.VoiceActivity"));}catch(Exception e){message("请先安装语音搜片组件");}}});
         addNav(header,"设置",false,new Runnable(){public void run(){showSettings();}});
         cleanButton=addNav(header,"一键清理",false,new Runnable(){public void run(){cleanBackground();}});cleanButton.setEnabled(!BackgroundCleaner.busy());
@@ -131,17 +146,19 @@ public class MainActivity extends Activity {
         hero.addView(heroTitle,new LinearLayout.LayoutParams(-1,dp(62)));hero.addView(heroSubtitle,new LinearLayout.LayoutParams(-1,dp(30)));
         LinearLayout.LayoutParams heroParams=new LinearLayout.LayoutParams(-1,dp(allApps?105:compactHome?100:132));heroParams.topMargin=dp(allApps?20:compactHome?32:62);root.addView(hero,heroParams);
         TextView section=text(allApps?"应用库":"常用",12,BlueRedTheme.FAINT);root.addView(section,new LinearLayout.LayoutParams(-1,dp(28)));
-        ScrollView scroll=new ScrollView(this);scroll.setClipToPadding(true);scroll.setClipChildren(true);scroll.setPadding(0,dp(8),0,dp(12));scroll.setVerticalScrollBarEnabled(false);
+        ScrollView scroll=new ScrollView(this);pageScroll=scroll;scroll.setClipToPadding(true);scroll.setClipChildren(true);scroll.setPadding(0,dp(8),0,dp(12));scroll.setVerticalScrollBarEnabled(false);
         GridLayout grid=new GridLayout(this);grid.setColumnCount(5);grid.setClipChildren(false);grid.setClipToPadding(false);
         int width=(getResources().getDisplayMetrics().widthPixels-dp(112))/5-dp(16);
         View restore=null;
         for(int i=0;i<apps.size();i++){View card=addCard(grid,apps.get(i),i,width);if(apps.get(i).pkg.equals(focusedPackage))restore=card;}
         View more=addCard(grid,new App(allApps?"返回首页":"全部应用","__more__",null,null),apps.size(),width);
         if("__more__".equals(focusedPackage))restore=more;
+        for(int n=0;n<grid.getChildCount();n++)grid.getChildAt(n).setId(View.generateViewId());
+        for(int n=0;n<grid.getChildCount();n++){View card=grid.getChildAt(n);int count=grid.getChildCount();card.setNextFocusLeftId(grid.getChildAt(n%5==0?n:n-1).getId());card.setNextFocusRightId(grid.getChildAt(n%5==4||n==count-1?n:n+1).getId());if(n>=5)card.setNextFocusUpId(grid.getChildAt(n-5).getId());card.setNextFocusDownId(grid.getChildAt(n+5<count?n+5:n/5<(count-1)/5?count-1:n).getId());}
         scroll.addView(grid,new ScrollView.LayoutParams(-1,-2));root.addView(scroll,new LinearLayout.LayoutParams(-1,0,1));
         TextView hint=text("长按应用，整理首页",11,BlueRedTheme.FAINT);hint.setGravity(Gravity.LEFT|Gravity.CENTER_VERTICAL);
-        root.addView(hint,new LinearLayout.LayoutParams(-1,dp(22)));setContentView(root);
-        if(restore!=null)restore.requestFocus();else if(grid.getChildCount()>0)grid.getChildAt(0).requestFocus();tickClock();
+        root.addView(hint,new LinearLayout.LayoutParams(-1,dp(22)));rootView=root;renderedAllApps=allApps;setContentView(root);TvUi.inset(this);
+        if(restore!=null)restore.requestFocus();else if(grid.getChildCount()>0)grid.getChildAt(0).requestFocus();final int restoreY=allApps?appsY:homeY;final boolean skipRestore=movingOrder;movingOrder=false;final ScrollView restoreScroll=scroll;scroll.post(new Runnable(){public void run(){if(!skipRestore)restoreScroll.scrollTo(0,restoreY);}});tickClock();
     }
     private void tickClock(){if(clock!=null)clock.setText(new SimpleDateFormat("HH:mm",Locale.CHINA).format(new Date()));if(date!=null)date.setText(new SimpleDateFormat("M月d日  EEE",Locale.CHINA).format(new Date()));}
     private String appVersion(){try{return getPackageManager().getPackageInfo(getPackageName(),0).versionName;}catch(Exception e){return "";}}
@@ -149,7 +166,7 @@ public class MainActivity extends Activity {
         final TextView tab=text(label,14,selected?BlueRedTheme.BLUE:BlueRedTheme.MUTED);tab.setGravity(Gravity.CENTER);tab.setFocusable(true);tab.setClickable(true);
         tab.setBackground(surface(selected?0xff254d80:0,selected?0xff24416c:0,0));
         LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(dp(64),dp(34));p.rightMargin=dp(8);bar.addView(tab,p);
-        tab.setOnFocusChangeListener(new View.OnFocusChangeListener(){public void onFocusChange(View v,boolean f){tab.setBackground(f?BlueRedTheme.focus(dp(15)):surface(selected?0xff254d80:0,selected?0xff24416c:0,0));tab.setTextColor(f?BlueRedTheme.DARK:selected?BlueRedTheme.BLUE:BlueRedTheme.MUTED);}});
+        tab.setOnFocusChangeListener(new View.OnFocusChangeListener(){public void onFocusChange(View v,boolean f){tab.setBackground(f?focusedSurface():surface(selected?0xff254d80:0,selected?0xff24416c:0,0));tab.setTextColor(f?BlueRedTheme.DARK:selected?BlueRedTheme.BLUE:BlueRedTheme.MUTED);}});
         tab.setOnClickListener(new View.OnClickListener(){public void onClick(View v){action.run();}});
         return tab;
     }
@@ -170,12 +187,12 @@ public class MainActivity extends Activity {
         final TextView label=text(app.name,13,BlueRedTheme.MUTED);label.setGravity(Gravity.CENTER);label.setSingleLine(true);label.setEllipsize(TextUtils.TruncateAt.END);
         LinearLayout.LayoutParams nameParams=new LinearLayout.LayoutParams(-1,dp(36));nameParams.topMargin=dp(6);card.addView(label,nameParams);
         card.setOnFocusChangeListener(new View.OnFocusChangeListener(){public void onFocusChange(View v,boolean f){
-            face.setBackground(f?BlueRedTheme.focus(dp(15)):surface(libre?0xff185995:0xff214f83,libre?0xff702e5e:0xff20395f,0));label.setTextColor(f?BlueRedTheme.TEXT:BlueRedTheme.MUTED);if(glyph!=null)glyph.color(f?BlueRedTheme.DARK:BlueRedTheme.BLUE);
-            v.animate().scaleX(f?1.025f:1f).scaleY(f?1.025f:1f).setDuration(140).start();
-            if(f){focusedPackage=app.pkg;heroTitle.setText(app.name);heroSubtitle.setText(description(app));}
+            face.setBackground(f?focusedSurface():surface(libre?0xff185995:0xff214f83,libre?0xff702e5e:0xff20395f,0));label.setTextColor(f?BlueRedTheme.TEXT:BlueRedTheme.MUTED);if(glyph!=null)glyph.color(f?BlueRedTheme.DARK:BlueRedTheme.BLUE);
+            v.animate().scaleX(f?1.035f:1f).scaleY(f?1.035f:1f).setDuration(140).start();
+            label.setTypeface(Typeface.DEFAULT,f?Typeface.BOLD:Typeface.NORMAL);if(f){focusedPackage=app.pkg;if(allApps)appsFocus=app.pkg;else homeFocus=app.pkg;heroTitle.setText(app.name);heroSubtitle.setText(description(app));}
         }});
         card.setOnClickListener(new View.OnClickListener(){public void onClick(View v){
-            if(app.pkg.equals("__more__")){allApps=!allApps;focusedPackage=null;build();return;}
+            if(app.pkg.equals("__more__")){switchPage(!allApps);return;}
             try{if(AutostartPolicy.managed(MainActivity.this,app.pkg))AutostartPolicy.launch(MainActivity.this,app.pkg);else startActivity(app.intent);}catch(Exception e){message("暂时无法打开这个应用："+e.getMessage());}
         }});
         if(!app.pkg.equals("__more__"))card.setOnLongClickListener(new View.OnLongClickListener(){public boolean onLongClick(View v){organize(app);return true;}});return card;
@@ -183,15 +200,18 @@ public class MainActivity extends Activity {
     private boolean isDefault(String pkg){if(pkg.equals("__music__")||pkg.equals("__libretv__")||pkg.equals("__cast__"))return true;for(String p:defaults)if(p.equals(pkg))return true;return false;}
     private void organize(final App app){
         final boolean visible=isDefault(app.pkg)?!preferences.getBoolean("hidden:"+app.pkg,false):preferences.getBoolean("favorite:"+app.pkg,false);
-        new AlertDialog.Builder(this).setTitle(app.name).setItems(new String[]{visible?"从首页移除":"添加到首页","应用信息"},new android.content.DialogInterface.OnClickListener(){
+        new AlertDialog.Builder(this).setTitle(app.name).setItems(visible?new String[]{"从首页移除","调整首页顺序","应用信息"}:new String[]{"添加到首页","应用信息"},new android.content.DialogInterface.OnClickListener(){
             public void onClick(android.content.DialogInterface d,int which){
                 if(which==0){SharedPreferences.Editor e=preferences.edit();if(isDefault(app.pkg))e.putBoolean("hidden:"+app.pkg,visible);else e.putBoolean("favorite:"+app.pkg,!visible);e.apply();focusedPackage=null;build();}
+                else if(visible&&which==1)reorder(app);
                 else try{if(app.pkg.equals("__libretv__"))startActivity(new Intent(MainActivity.this,LibreTvLibraryActivity.class));else if(app.pkg.equals("__music__"))startActivity(new Intent(MainActivity.this,MusicActivity.class));else if(app.pkg.equals("__cast__"))startActivity(new Intent(MainActivity.this,CastActivity.class));else startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.parse("package:"+app.pkg)));}catch(Exception e){message("暂时无法打开应用信息");}
             }
         }).show();
     }
+    private void reorder(final App app){new AlertDialog.Builder(this).setTitle("调整首页顺序 · "+app.name).setItems(new String[]{"置顶","前移一位","后移一位"},new android.content.DialogInterface.OnClickListener(){public void onClick(android.content.DialogInterface d,int which){boolean old=allApps;allApps=false;List<App> current=applications();allApps=old;List<String> ids=new ArrayList<String>();for(App a:current)ids.add(a.pkg);List<String> next=HomeOrder.move(ids,app.pkg,which==1?-1:1,which==0);preferences.edit().putString("home_order_v1",new org.json.JSONArray(next).toString()).apply();homeFocus=app.pkg;allApps=false;movingOrder=true;build();}}).setNegativeButton("返回",null).show();}
+    public static org.json.JSONObject diagnostics(){try{MainActivity a=live.get();if(a==null)return new org.json.JSONObject();return new org.json.JSONObject().put("allApps",a.allApps).put("focus",a.focusedPackage).put("scrollY",a.pageScroll==null?0:a.pageScroll.getScrollY()).put("builds",a.buildCount).put("safeMargin",TvUi.margin(a)).put("homeOrder",new org.json.JSONArray(a.preferences.getString("home_order_v1","[]")));}catch(Exception e){return new org.json.JSONObject();}}
     private void showSettings(){
-        new AlertDialog.Builder(this).setTitle("桌面设置").setItems(new String[]{"系统设置","背景颜色","蜡笔屏保","主页键设置","恢复原系统桌面","关于轻桌面","后台与自启动"},new android.content.DialogInterface.OnClickListener(){
+        new AlertDialog.Builder(this).setTitle("桌面设置").setItems(new String[]{"系统设置","背景颜色","蜡笔屏保","主页键设置","恢复原系统桌面","关于轻桌面","后台与自启动","画面 / 课程 / 备份 / 更新"},new android.content.DialogInterface.OnClickListener(){
             public void onClick(android.content.DialogInterface d,int which){
                 if(which==0)try{startActivity(new Intent(Settings.ACTION_SETTINGS));}catch(Exception e){message("暂时无法打开系统设置");}
                 if(which==1)new AlertDialog.Builder(MainActivity.this).setTitle("背景颜色").setSingleChoiceItems(new String[]{"蓝红","海蓝","莓红"},preferences.getInt("theme",0),new android.content.DialogInterface.OnClickListener(){public void onClick(android.content.DialogInterface dialog,int item){preferences.edit().putInt("theme",item).apply();dialog.dismiss();build();}}).show();
@@ -199,6 +219,7 @@ public class MainActivity extends Activity {
                 if(which==3)homeKeySettings();
                 if(which==4)new AlertDialog.Builder(MainActivity.this).setTitle("恢复原系统桌面？").setMessage("重新显示原桌面包，清除轻桌面的默认主页设置，并解除本地设备管理。轻桌面和原有应用数据会保留。").setPositiveButton("恢复",new android.content.DialogInterface.OnClickListener(){public void onClick(android.content.DialogInterface dialog,int item){try{HomePolicy.restore(MainActivity.this);}catch(RuntimeException e){message("恢复未完成："+e.getMessage());}}}).setNegativeButton("取消",null).show();
                 if(which==6)autostartSettings();
+                if(which==7)startActivity(new Intent(MainActivity.this,LauncherSettingsActivity.class));
                 if(which==5)message("轻桌面 "+appVersion()+"\n极简首页 · LibreTV · 轻音乐 · 投屏 · 课程屏保\n影视、音乐与天气由盒子独立运行，无需电脑开机。\n\n"+(HomePolicy.active(MainActivity.this)?"已固定主页并管理系统广告。可以在设置中恢复原系统桌面。":"当前尚未完成默认主页配置。")+"\n长按应用可整理首页常用应用。");
             }
         }).show();

@@ -1,0 +1,11 @@
+package local.m13.home;
+import android.app.*;
+import android.content.*;
+
+/** Display preferences only; no playback/account settings are changed. */
+public final class MusicUi {
+    public static void options(final Activity a){final MusicService service=MusicService.current();int seconds=service==null?0:service.sleepSeconds();new AlertDialog.Builder(a).setTitle("播放设置"+(seconds>0?" · "+((seconds+59)/60)+" 分钟后暂停":"")).setItems(new String[]{"播放顺序","睡眠定时","重试当前歌曲","歌词字号"},new DialogInterface.OnClickListener(){public void onClick(DialogInterface d,int n){if(n==0)new AlertDialog.Builder(a).setTitle("播放顺序").setSingleChoiceItems(new String[]{"顺序播放 · 播完列表停止","单曲循环","随机播放"},a.getSharedPreferences("music-ui",0).getInt("play-mode",0),new DialogInterface.OnClickListener(){public void onClick(DialogInterface d,int value){a.getSharedPreferences("music-ui",0).edit().putInt("play-mode",value).apply();d.dismiss();}}).setNegativeButton("返回",null).show();else if(n==1)new AlertDialog.Builder(a).setTitle("睡眠定时 · 到时暂停音乐").setItems(new String[]{"关闭定时","15 分钟","30 分钟","60 分钟","90 分钟"},new DialogInterface.OnClickListener(){public void onClick(DialogInterface d,int value){MusicService m=MusicService.current();if(m==null){android.widget.Toast.makeText(a,"请先播放歌曲",0).show();return;}m.setSleep(new int[]{0,15,30,60,90}[value]);android.widget.Toast.makeText(a,value==0?"定时已关闭":"已设置，到时暂停音乐",0).show();}}).setNegativeButton("返回",null).show();else if(n==2)MusicService.command(a,"retry");else chooseSize(a,new Runnable(){public void run(){}});}}).setNegativeButton("返回",null).show();}
+    public static int size(Context c){return Math.max(0,Math.min(3,c.getSharedPreferences("music-ui",0).getInt("lyric-size",1)));}
+    public static int lyricSize(Context c,boolean full){return (full?new int[]{28,34,40,46}:new int[]{18,22,26,30})[size(c)];}
+    public static void chooseSize(final Activity a,final Runnable changed){new AlertDialog.Builder(a).setTitle("歌词字号").setSingleChoiceItems(new String[]{"小","标准","大","超大"},size(a),new DialogInterface.OnClickListener(){public void onClick(DialogInterface d,int n){a.getSharedPreferences("music-ui",0).edit().putInt("lyric-size",n).apply();changed.run();d.dismiss();}}).setNegativeButton("返回",null).show();}
+}

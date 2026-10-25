@@ -17,8 +17,9 @@ public final class MusicService extends Service implements AudioManager.OnAudioF
     private MediaPlayer player;private LibreTvLocalProxy relay;private AudioManager audio;private MediaSession session;
     private JSONArray queue=new JSONArray();private int index=-1,generation;private JSONObject song=new JSONObject();
     private List<MusicLyrics.Line> lyrics=Collections.emptyList();private String state="stopped",error="";
+    private int checkpointTicks;private long sleepUntil;private final java.util.Random shuffle=new java.util.Random();
     private long declaredMs;private boolean prepared,resumeOnFocus;private int resumeSeek;
-    private final Runnable checkpoint=new Runnable(){public void run(){if(prepared)savePosition();ui.postDelayed(this,5000);}};
+    private final Runnable checkpoint=new Runnable(){public void run(){if(sleepUntil>0&&android.os.SystemClock.elapsedRealtime()>=sleepUntil){if(prepared)pause();else if("loading".equals(state)){generation++;releasePlayer();state="paused";notifyState();}sleepUntil=0;}if(prepared&&checkpointTicks++%5==0)savePosition();ui.postDelayed(this,1000);}};
     public void onCreate(){super.onCreate();NeteaseAccount.init(this);live=this;audio=(AudioManager)getSystemService(AUDIO_SERVICE);session=new MediaSession(this,"M13 Music");session.setFlags(MediaSession.FLAG_HANDLES_MEDIA_BUTTONS|MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
         session.setCallback(new MediaSession.Callback(){public void onPlay(){resume();}public void onPause(){pause();}public void onSkipToNext(){next(1);}public void onSkipToPrevious(){next(-1);}public void onStop(){stopMusic();}public void onSeekTo(long p){seek((int)p);}});session.setActive(true);ui.post(checkpoint);
     }
@@ -27,7 +28,7 @@ public final class MusicService extends Service implements AudioManager.OnAudioF
         if(intent==null){stopSelf();return START_NOT_STICKY;}
         String action=intent.getAction();
         if("play".equals(action))try{queue=new JSONArray(intent.getStringExtra("queue"));index=intent.getIntExtra("index",0);load(intent.getIntExtra("resume",0));}catch(Exception e){fail("歌曲列表无效");}
-        else if("toggle".equals(action))toggle();else if("next".equals(action))next(1);else if("previous".equals(action))next(-1);else if("stop".equals(action))stopMusic();
+        else if("retry".equals(action)){if(index>=0)load(resumeSeek);}else if("sleep".equals(action)){setSleep(intent.getIntExtra("minutes",0));}else if("toggle".equals(action))toggle();else if("next".equals(action))next(1);else if("previous".equals(action))next(-1);else if("stop".equals(action))stopMusic();
         return START_NOT_STICKY;
     }
     public static void play(Context c,JSONArray queue,int index,int resume){c.startService(new Intent(c,MusicService.class).setAction("play").putExtra("queue",queue.toString()).putExtra("index",index).putExtra("resume",resume));}
@@ -50,7 +51,7 @@ public final class MusicService extends Service implements AudioManager.OnAudioF
             if(declaredMs>90000&&p.getDuration()>0&&p.getDuration()+8000<declaredMs){fail("音乐源只返回了片段，请换一首");return;}
             try{if(resumeSeek>0&&resumeSeek<p.getDuration()-2000)p.seekTo(resumeSeek);resumeSeek=0;new MusicStore(MusicService.this).played(song);resume();}catch(Exception e){fail("音乐未能开始播放");}
         }});
-        fresh.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){public void onCompletion(MediaPlayer p){if(request==generation)next(1);}});
+        fresh.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){public void onCompletion(MediaPlayer p){if(request==generation){int next=MusicQueuePolicy.next(index,queue.length(),1,true,mode(),shuffle);if(next<0){pause();seek(0);}else{index=next;load(0);}}}});
         fresh.setOnErrorListener(new MediaPlayer.OnErrorListener(){public boolean onError(MediaPlayer p,int what,int extra){if(request==generation)fail("音频播放失败（"+what+" / "+extra+"），请换一首");return true;}});
         fresh.setDataSource(relay.url(stream.url));fresh.prepareAsync();
     }catch(Exception e){fail("音乐源连接失败，请重试或换一首");}}
@@ -58,9 +59,12 @@ public final class MusicService extends Service implements AudioManager.OnAudioF
     public void resume(){if(!prepared||player==null)return;int focus=audio.requestAudioFocus(this,AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN);if(focus!=AudioManager.AUDIOFOCUS_REQUEST_GRANTED){state="paused";error="音频正被其他应用使用";notifyState();return;}player.setVolume(1,1);player.start();state="playing";error="";resumeOnFocus=false;notifyState();}
     public void pause(){if(prepared&&player!=null){player.pause();state="paused";savePosition();notifyState();}}
     public void seek(int milliseconds){if(prepared&&player!=null)player.seekTo(Math.max(0,Math.min(milliseconds,Math.max(0,player.getDuration()-1000))));}
-    public void next(int direction){if(queue.length()==0)return;index=(index+direction+queue.length())%queue.length();load(0);}
+    public void next(int direction){if(queue.length()==0)return;index=MusicQueuePolicy.next(index,queue.length(),direction,false,mode(),shuffle);load(0);}
+    public int mode(){return getSharedPreferences("music-ui",0).getInt("play-mode",0);}
+    public void setSleep(int minutes){sleepUntil=minutes<=0?0:android.os.SystemClock.elapsedRealtime()+Math.min(180,minutes)*60000L;}
+    public int sleepSeconds(){return sleepUntil==0?0:(int)Math.max(0,(sleepUntil-android.os.SystemClock.elapsedRealtime()+999)/1000);}
     public void stopMusic(){savePosition();generation++;releasePlayer();state="stopped";error="";audio.abandonAudioFocus(this);stopForeground(true);stopSelf();}
-    private void fail(String message){releasePlayer();state="error";error=message;audio.abandonAudioFocus(this);stopForeground(true);notifyState();}
+    private void fail(String message){if(prepared)resumeSeek=position();releasePlayer();state="error";error=message;audio.abandonAudioFocus(this);stopForeground(true);notifyState();}
     public void onAudioFocusChange(int value){if(value==AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK){if(player!=null&&prepared)player.setVolume(.18f,.18f);}else if(value==AudioManager.AUDIOFOCUS_LOSS||value==AudioManager.AUDIOFOCUS_LOSS_TRANSIENT){boolean playing="playing".equals(state);pause();resumeOnFocus=value==AudioManager.AUDIOFOCUS_LOSS_TRANSIENT&&playing;}else if(value==AudioManager.AUDIOFOCUS_GAIN){if(prepared&&player!=null)player.setVolume(1,1);if(resumeOnFocus)resume();}}
     private PendingIntent command(String action,int id){return PendingIntent.getService(this,id,new Intent(this,MusicService.class).setAction(action),PendingIntent.FLAG_UPDATE_CURRENT);}
     private void notifyState(){
@@ -78,6 +82,6 @@ public final class MusicService extends Service implements AudioManager.OnAudioF
     public String state(){return state;}
     public String error(){return error;}
     private void savePosition(){if(prepared)getSharedPreferences("music-local-v1",0).edit().putInt("resumePosition",position()).putString("resumeSong",song.toString()).apply();}
-    public static JSONObject diagnostics(){try{MusicService s=live;if(s==null)return new JSONObject().put("state","stopped");return new JSONObject().put("state",s.state).put("title",s.song.optString("name")).put("source",s.song.optString("source")).put("id",s.song.optString("id")).put("position",s.position()).put("duration",s.duration()).put("declaredDuration",s.declaredMs).put("lyrics",s.lyrics.size()).put("queueSize",s.queue.length()).put("index",s.index).put("relayRequests",s.relay==null?0:s.relay.requestCount()).put("upstreamHosts",s.relay==null?"":s.relay.upstreamHosts()).put("relayError",s.relay==null?"":s.relay.lastError()).put("error",s.error).put("standalone",true);}catch(Exception e){return new JSONObject();}}
+    public static JSONObject diagnostics(){try{MusicService s=live;if(s==null)return new JSONObject().put("state","stopped");return new JSONObject().put("state",s.state).put("title",s.song.optString("name")).put("source",s.song.optString("source")).put("id",s.song.optString("id")).put("position",s.position()).put("duration",s.duration()).put("declaredDuration",s.declaredMs).put("lyrics",s.lyrics.size()).put("queueSize",s.queue.length()).put("index",s.index).put("relayRequests",s.relay==null?0:s.relay.requestCount()).put("upstreamHosts",s.relay==null?"":s.relay.upstreamHosts()).put("relayError",s.relay==null?"":s.relay.lastError()).put("error",s.error).put("standalone",true).put("playMode",s.mode()).put("sleepSeconds",s.sleepSeconds());}catch(Exception e){return new JSONObject();}}
     public void onDestroy(){savePosition();generation++;ui.removeCallbacksAndMessages(null);network.shutdownNow();releasePlayer();audio.abandonAudioFocus(this);session.release();live=null;super.onDestroy();}
 }

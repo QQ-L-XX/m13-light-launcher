@@ -22,25 +22,32 @@ A minimal TV home for video, music, casting and a crayon weather & class calenda
 
 A native Java launcher developed on a MagicBox M13: video, music and casting on the home screen, with a crayon calendar, two-day weather and tomorrow's classes during idle time. It runs on the box without a PC server; online media and weather require internet. This is an independent community adaptation, not an official LibreTV, Apple, NetEase or Tmall product.
 
-<img src="docs/images/home-2.30.png" alt="轻桌面 2.30 实机首页，两行卡片与底部提示分开显示 / Two-row home with a separate footer" width="100%" />
+<img src="docs/images/home-2.33.png" alt="2.33 实机首页：清晰焦点与极简两行卡片 / M13 home with a clear focus border" width="100%" />
 
-*首页、焦点和应用页截图为 2026-10-23 的 2.30 实机；轻音乐及日夜屏保对照图为 2.24，周末规则图为 2.28。课表均为示例，不含私人课程。M13 screenshots: home/focus/apps are 2.30, music/day-night views are 2.24, and the weekend example is 2.28. Timetables use demo data. Third-party app icons belong to their owners.*
+*以下截图均为 2026-10-25 的 2.33 M13 实机。课程编辑与日夜屏保均使用示例课表，不含姓名、班级、私人课程、账号或登录二维码。All screenshots below show 2.33 on M13. Timetables use demo data. Third-party app icons belong to their owners.*
 
-## 2.30 界面修复 / Home layout fixes
+## 2.33：更顺手，也更好管理 / Better TV controls
 
-两行卡片的首页缩短顶部留白，“全部应用”文字与底部提示各有独立空间；向下移动焦点或滚动应用页时，卡片不会越过滚动区域盖住“常用”或页脚。“关于轻桌面”读取实际安装版本，保留现有影视、轻音乐、投屏和周末课程功能。
+- **遥控器与画面**：清晰焦点、长按排序、返回后保留位置，四档电视边距减少裁字。Clear focus, home ordering, retained navigation and overscan margins.
+- **轻音乐**：极简全屏、四档歌词字号、顺序／单曲循环／随机播放、睡眠定时和重试。Fullscreen music, lyric sizes, playback modes, sleep pause and retries.
+- **课程与屏保**：遥控器编辑课表，支持指定日期调课和放假；天气缓存标注时间。Remote-editable courses, date exceptions and labelled weather cache.
+- **设置与更新**：本机备份、恢复与撤销；盒子直接检查 GitHub 更新并保留安装包。Local settings backup/restore and public GitHub update discovery.
 
-The two-row home uses less header whitespace. Card labels stay separate from the footer, and focus movement or scrolling stays within the card viewport. About displays the installed version. Existing video, music, casting and weekend-to-Monday classes are retained.
+从首页“设置 → 画面 / 课程 / 备份 / 更新”进入。在线升级仅接受较新的正式版，下载后检查大小、SHA-256、包名、签名和版本号，再交由系统确认安装。完整的在线下载升级到更高版本尚待后续版本验证。此 M13 无系统文件选择器，当前验证的是本机设置备份；APK 保留不代表能绕过 Android 的降级限制。
 
-<table><tr><td width="50%"><img src="docs/images/home-focus-bottom-2.30.png" alt="2.30 选中底部全部应用，文字与提示不重叠 / Lower-row focus without overlap" /></td><td width="50%"><img src="docs/images/apps-2.30.png" alt="2.30 应用页，卡片和底部提示独立显示 / Apps grid with a separate footer" /></td></tr><tr><td align="center">底部焦点 / Lower-row focus</td><td align="center">应用页 / Apps</td></tr></table>
+Open Settings → Display / Courses / Backup / Updates. The updater validates package integrity, identity and version before requesting installation. Update discovery and installer opening are verified; downloading and installing a future newer release is still pending. Local backup works on this M13; file export requires a system document picker.
+
+[设置使用说明 / Settings guide](docs/SETTINGS.md) · [验证记录 / Validation](docs/VALIDATION.md)
+
+<table><tr><td width="50%"><img src="docs/images/apps-2.33.png" alt="2.33 应用页遥控器焦点 / Apps navigation" /></td><td width="50%"><img src="docs/images/settings-2.33.png" alt="2.33 画面、课程、备份与更新入口 / On-box settings" /></td></tr><tr><td align="center">应用与焦点 / Apps & focus</td><td align="center">盒子上的设置 / On-box settings</td></tr></table>
 
 ## 轻音乐 / Music on the box
 
-从首页打开轻音乐，直接搜歌曲或歌单，查看行歌词、收藏、播放历史和续听。用网易云 App 扫码授权后，按账号实际权限获取歌曲；播放区提供逐曲歌词时间校准。搜索、歌词和音频都由盒子获取，不需要电脑常开。
+从首页打开轻音乐，直接搜歌曲或歌单，查看行歌词、收藏、播放历史和续听。用网易云 App 扫码授权后，按账号实际权限获取歌曲；播放区提供逐曲歌词时间校准、四档字号与全屏歌词，支持顺序播放、单曲循环、随机播放和睡眠定时。搜索、歌词和音频都由盒子获取，不需要电脑常开。
 
-Search tracks and playlists, follow line lyrics, save favorites and resume listening directly on the box. NetEase QR login uses your account's actual rights; per-track lyric timing can be adjusted. Availability is controlled by the provider. See [music features and limits](docs/MUSIC.md).
+Search tracks and playlists, follow line lyrics, save favorites and resume listening directly on the box. NetEase QR login uses your account's actual rights; per-track lyric timing and size can be adjusted. Fullscreen mode, sequential/repeat/shuffle playback and sleep pause timers are included. Availability is controlled by the provider. See [music features and limits](docs/MUSIC.md).
 
-<img src="docs/images/music-2.24.png" alt="轻音乐实机播放界面，展示搜索、网易云账号入口、歌词区域和歌词校准 / Native music playback" width="100%" />
+<table><tr><td width="50%"><img src="docs/images/music-2.33.png" alt="2.33 轻音乐搜索与播放 / Music search and playback" /></td><td width="50%"><img src="docs/images/music-fullscreen-2.33.png" alt="2.33 极简全屏音乐 / Minimal fullscreen music" /></td></tr><tr><td align="center">列表播放 / Music library</td><td align="center">全屏播放 / Fullscreen player</td></tr></table>
 
 ## 明天有安排，屏保看得见 / Tomorrow at a glance
 
@@ -48,13 +55,13 @@ Search tracks and playlists, follow line lyrics, save favorites and resume liste
 
 A seven-lesson row separates morning and afternoon beneath the calendar and weather. The calendar uses Asia/Shanghai; day and night palettes can follow sunrise and sunset. Both images below use the same sample timetable. [Configure your own classes](docs/TIMETABLE.md).
 
-<table><tr><td width="50%"><img src="docs/images/timetable-day-demo-2.24.png" alt="日间课程屏保，示例课表 / Day screensaver with demo classes" /></td><td width="50%"><img src="docs/images/timetable-night-demo-2.24.png" alt="夜间课程屏保，示例课表 / Night screensaver with demo classes" /></td></tr><tr><td align="center">日间 · 示例课程 / Day · Demo classes</td><td align="center">夜间 · 示例课程 / Night · Demo classes</td></tr></table>
+<table><tr><td width="50%"><img src="docs/images/timetable-day-demo-2.33.png" alt="日间课程屏保，示例课表 / Day screensaver with demo classes" /></td><td width="50%"><img src="docs/images/timetable-night-demo-2.33.png" alt="夜间课程屏保，示例课表 / Night screensaver with demo classes" /></td></tr><tr><td align="center">日间 · 示例课程 / Day · Demo classes</td><td align="center">夜间 · 示例课程 / Night · Demo classes</td></tr></table>
 
 ## 功能 / Features
 
 | 模块 / Module | 体验 / Experience |
 |---|---|
-| 极简桌面 / Home | 蓝红配色、大卡片、遥控器焦点、应用与设置入口。Native TV navigation and app shortcuts. |
+| 极简桌面 / Home | 蓝红配色、大卡片、遥控器排序、位置保留和电视边距。TV focus, ordering, preserved navigation and safe margins. |
 | 影视 / Video | 海报首页、分类、中文模糊搜索、拼音与首字母搜索（如 `lldq`）、独立分页、观看记录。Posters, filters, fuzzy/pinyin/initial search, pagination and local history. |
 | 片源合并 / Grouping | 同名同年作品合并为海报，进入后选择片源；不同年份、续集等保留区分。Group compatible titles while retaining provider variants. |
 | 轻音乐 / Music | 独立搜歌、歌单、网易云扫码登录、账号权限播放、行歌词与校准、收藏及续听。On-device music and NetEase QR account login; see [music scope](docs/MUSIC.md). |
@@ -64,13 +71,15 @@ A seven-lesson row separates morning and afternoon beneath the calendar and weat
 
 日出日落在盒子离线计算，默认福州（26.0745°N, 119.2965°E），使用北京时间。天气通过 Open-Meteo 获取；太阳时刻为当地估算值，不能作为精密观测时间。Solar switching works offline; weather does not.
 
-屏保底部可显示课程：**周一至周四显示明天，周五至周日直接显示下周一**，标题明确标为“下周一课程”，并显示周一的实际日期。课程表保存在盒子应用私有区，默认安装包不包含个人课程、姓名或班级。按每周固定课表计算，调休及临时换课需另行更新。[课程配置 / Timetable configuration](docs/TIMETABLE.md). Monday–Thursday shows tomorrow; Friday–Sunday shows the upcoming Monday with an explicit label and date. Personal timetables stay on-device.
+屏保底部可显示课程：**周一至周四显示明天，周五至周日直接显示下周一**，标题明确标为“下周一课程”，并显示周一的实际日期。课程表保存在盒子应用私有区，默认安装包不包含个人课程、姓名或班级。支持在盒子上直接编辑每周课表、指定日期调课与放假。[课程配置 / Timetable configuration](docs/TIMETABLE.md). Monday–Thursday shows tomorrow; Friday–Sunday shows the upcoming Monday with an explicit label and date. Personal timetables stay on-device.
 
-当前公开版本 **2.30** 修复首页、卡片焦点及页脚重叠，保留周末显示下周一课程、独立音乐、网易云登录、歌词校准，以及现有影视网格与语音独立包联动。语音引擎仍不包含在此 APK 中。实机及构建检查见 [验证范围](docs/VALIDATION.md) 与 [音乐验证](docs/MUSIC-VALIDATION.md)。Version 2.30 fixes home/focus/footer layout while retaining the existing media, timetable and optional voice integration; the speech engine is not bundled.
+当前公开版本 **2.33** 包含 2.32 的首页排序、位置保留与全屏音乐，以及本次设置、课程与播放优化。保留现有影视网格与可选语音独立包联动；语音引擎不包含在此 APK 中。Version 2.33 includes the unpublished 2.32 improvements. The speech engine remains an optional separate companion.
 
-<img src="docs/images/weekend-monday-demo-2.28.png" alt="2.28 周五显示下周一课程，使用示例课表 / Friday shows the upcoming Monday with demo classes" width="100%" />
+<details><summary>遥控器编辑课程 · 示例 / Remote course editor · Demo</summary>
 
-*2.28 实机示例，2026-10-23：周五直接显示 10 月 26 日周一，图中课程仅用于演示。On-device demo: Friday October 23 shows Monday October 26; course names are sample data.*
+<img src="docs/images/course-editor-demo-2.33.png" alt="2.33 使用示例科目的课程编辑页 / Course editor with demo lessons" width="100%" />
+
+</details>
 
 ## 开始使用 / Quick start
 
@@ -80,7 +89,7 @@ A seven-lesson row separates morning and afternoon beneath the calendar and weat
 
 ```powershell
 adb devices -l
-adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.30.apk
+adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.33.apk
 adb -s <DEVICE_SERIAL> shell am start -n local.m13.home/.MainActivity
 ```
 
