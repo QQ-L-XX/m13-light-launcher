@@ -1,5 +1,36 @@
 # Changelog / 版本记录
 
+## 2.41 · 电视新闻播报 / TV news guide
+
+- 新闻页采用 LibreTV 的视觉主题和遥控焦点。听新闻时浏览三列节目卡片，看视频时可在画面旁选节目，或进入全屏后按返回键回到列表。
+- 收录央广《新闻和报纸摘要》、《资讯早7点》和中新网视频。按北京时间优先选当天内容，同一天内优先科技财经，再选军事与国内外大事、综合早报、体育民生及其他。节目上架时间由来源决定。
+- 每日 07:10–07:50 可自动播报。已播记录保存在盒子上，音频、视频与应用重启共用；遇到暂时不可播的节目会尝试下一条。同一事件在不同媒体的报道可分别出现。
+- Browse a remote-friendly audio or video guide, open a report directly and return from fullscreen with Back. The daily schedule prioritizes current editions and persists played programme IDs across modes and restarts.
+
+## 2.36 — Warm app return and paused background posters
+
+- Retain the on-demand Bili app for about two minutes after returning home; quick reopening avoids hiding/re-enabling the app. Other managed apps retain their existing 20-second grace.
+- Use monotonic time and reset retention on boot. Existing playback protection remains active before restricting any managed app.
+- Pause poster queues, cancel active poster connections and release decoded poster caches when the film or music page leaves the foreground. Reload visible covers on return; music playback uses its independent service.
+- Add local diagnostics and boundary checks for retention windows. Device checks and limits are recorded in docs/VALIDATION.md.
+
+## 2.35 — Reversible optional app cleanup
+
+- Add an on-box optional-app menu limited to the stock education, music and photo applications.
+- Preserve app data and original visibility; cancel a selection to restore the app. System APKs are retained and no firmware partition is written.
+- Reject packages outside the allowlist and packages using privileged system identities. Roll back visibility if a configuration step fails.
+- Restoring the original system desktop also restores optional apps before releasing device management.
+- Installed on M13: hide all three, restore all three, hide again and verify the on-box checkboxes. Network/input/media components stayed enabled; casting reception, personal courses and music authorization were preserved.
+
+## 2.34 — Visible video seeking and TV search input
+
+- Replace the floating system video controller with an in-frame timeline: current/total time, pending seek target, progress thumb and pause state.
+- Accumulate rapid remote seeks against the requested target instead of stale decoder time; keep the timeline visible while paused or seeking.
+- Add a blue/red app-local remote keyboard with number/letter keys, delete/clear/space, local title suggestions and a system Chinese-input fallback. Cancel preserves the original search; selecting a suggestion submits the title.
+- Keep keyboard suggestions bounded and use indexed exact/prefix lookups independently of full fuzzy search.
+- Add a reversible system-transition animation setting using an already granted platform permission. This shortens animation duration and does not promise a higher rendering frame rate.
+- M13 checks: actual film decode, three forward presses accumulating 30 seconds, rewind, persistent paused timeline, resume, initials-to-title suggestion and search submission. Host assertions: 5,410 PASS. This local 2.34 update is not yet published.
+
 ## 2.33 — TV settings, music controls and local recovery
 
 - Add four overscan margins without cropping media surfaces; preserve the TV layout proportions.

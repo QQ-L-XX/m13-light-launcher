@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.m13.home" android:versionCode="47" android:versionName="2.33">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="local.m13.home" android:versionCode="55" android:versionName="2.41">
   <uses-permission android:name="local.m13.voice.PREWARM" />
   <uses-sdk android:minSdkVersion="21" android:targetSdkVersion="22" />
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -20,6 +20,11 @@
     <activity android:name=".LauncherSettingsActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
     <activity android:name=".LauncherUpdateActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
     <activity android:name=".MusicPlayerActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
+    <activity android:name=".NewsActivity" android:exported="false" android:screenOrientation="landscape" android:launchMode="singleTop"/>
+    <receiver android:name=".NewsSchedule" android:exported="false"><intent-filter>
+      <action android:name="android.intent.action.TIME_SET"/>
+      <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+    </intent-filter></receiver>
     <activity android:name=".MusicActivity" android:windowSoftInputMode="stateAlwaysHidden|adjustNothing" android:exported="true" android:screenOrientation="landscape" android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize" />
     <service android:name=".MusicService" android:exported="false" />
     <receiver android:name=".MusicDiagnostics" android:exported="true" android:permission="android.permission.DUMP" />

@@ -10,6 +10,15 @@ import org.json.JSONObject;
 public class LibreTvProvision extends BroadcastReceiver {
     public void onReceive(Context c,Intent i){
         try{
+            if("local.m13.home.POSTER_STATUS".equals(i.getAction())){setResultCode(-1);setResultData(LibreTvPosters.diagnostics().toString());return;}
+
+            if("local.m13.home.PREINSTALLED_STATUS".equals(i.getAction())){setResultCode(-1);setResultData(PreinstalledApps.status(c).toString());return;}
+            if("local.m13.home.PREINSTALLED_CONFIG".equals(i.getAction())){java.util.Set<String> names=new java.util.HashSet<String>();String packages=i.getStringExtra("packages");if(packages==null)throw new IllegalArgumentException("缺少应用清单");for(String name:packages.split(","))if(!name.isEmpty())names.add(name);PreinstalledApps.configure(c,names);setResultCode(-1);setResultData(PreinstalledApps.status(c).toString());return;}
+
+            if("local.m13.home.TV_MOTION".equals(i.getAction())){TvUi.motion(c,"fast".equals(i.getStringExtra("mode")));setResultCode(-1);setResultData(new JSONObject().put("fast",c.getSharedPreferences("home",0).getBoolean("fast-motion",false)).toString());return;}
+
+            if("local.m13.home.KEYBOARD_STATUS".equals(i.getAction())){setResultCode(-1);setResultData(TvSearchKeyboard.diagnostics().toString());return;}
+
             if("local.m13.home.SETTINGS_OPEN".equals(i.getAction())){c.startActivity(new Intent(c,"update".equals(i.getStringExtra("page"))?LauncherUpdateActivity.class:LauncherSettingsActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));setResultCode(-1);setResultData("Opened");return;}
             if("local.m13.home.FEATURE_STATUS".equals(i.getAction())){JSONObject backup=LauncherBackup.export(c);LauncherBackup.validate(backup);JSONObject timetable=CrayonTimetableStore.config(c);setResultCode(-1);setResultData(new JSONObject().put("safeMargin",TvUi.margin(c)).put("backupValid",true).put("backupPresent",new java.io.File(c.getFilesDir(),"settings-backup.json").isFile()).put("holidays",timetable.optJSONArray("holidays")==null?0:timetable.getJSONArray("holidays").length()).put("overrides",timetable.optJSONObject("overrides")==null?0:timetable.getJSONObject("overrides").length()).put("update",LauncherUpdateActivity.diagnostics()).toString());return;}
 

@@ -36,6 +36,11 @@ public final class LibreTvTitleIndex {
         List<String> names=new ArrayList<String>(matches.keySet());Collections.sort(names,new Comparator<String>(){public int compare(String a,String b){int r=Integer.compare(matches.get(b),matches.get(a));if(r!=0)return r;r=Integer.compare(a.length(),b.length());return r!=0?r:a.compareTo(b);}});
         return new ArrayList<String>(names.subList(0,Math.min(128,names.size())));
     }
+    public synchronized List<String> suggest(String word,int limit){
+        word=word==null?"":word.trim();limit=Math.max(1,Math.min(8,limit));if(word.length()<2)return Collections.emptyList();
+        if(LibreTvPinyin.query(word)){String q=LibreTvPinyin.latin(word);LinkedHashSet<String> found=new LinkedHashSet<String>();for(boolean prefix:new boolean[]{false,true})for(String column:new String[]{"initials","py"}){Cursor cursor=db.rawQuery("SELECT n.name FROM title_keys k JOIN titles n ON n.id=k.title_id WHERE k."+column+(prefix?">=? AND k."+column+"<?":"=?")+" LIMIT 24",prefix?new String[]{q,q+"{"}:new String[]{q});try{while(cursor.moveToNext()){found.add(cursor.getString(0));if(found.size()>=limit)return new ArrayList<String>(found);}}finally{cursor.close();}}return new ArrayList<String>(found);}
+        List<String> names=new ArrayList<String>();String escaped=word.replace("!","!!").replace("%","!%").replace("_","!_");Cursor c=db.rawQuery("SELECT name FROM titles WHERE name LIKE ? ESCAPE '!' ORDER BY length(name),name LIMIT ?",new String[]{"%"+escaped+"%",String.valueOf(limit)});try{while(c.moveToNext())names.add(c.getString(0));}finally{c.close();}return names;
+    }
     private void collect(Map<String,Integer> out,String where,String[] args,String query,int limit){
         Cursor c=db.rawQuery("SELECT n.name,k.py,k.initials FROM title_keys k JOIN titles n ON n.id=k.title_id WHERE "+where+" ORDER BY length(n.name),n.name LIMIT "+limit,args);
         try{while(c.moveToNext()){String name=c.getString(0);int score=LibreTvPinyin.keyScore(c.getString(1),c.getString(2),query);Integer old=out.get(name);if(old==null||old<score)out.put(name,score);}}finally{c.close();}

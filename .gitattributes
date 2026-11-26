@@ -3,3 +3,6 @@
 *.gz binary
 *.bin binary
 *.ttf binary
+app/assets/pinyin-data-MIT-LICENSE.txt text eol=lf
+app/assets/mozilla-cacert.pem text eol=lf
+app/assets/certifi-LICENSE.txt text eol=lf

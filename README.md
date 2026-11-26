@@ -22,6 +22,14 @@ A minimal TV home for video, music, casting and a crayon weather & class calenda
 
 A native Java launcher developed on a MagicBox M13: video, music and casting on the home screen, with a crayon calendar, two-day weather and tomorrow's classes during idle time. It runs on the box without a PC server; online media and weather require internet. This is an independent community adaptation, not an official LibreTV, Apple, NetEase or Tmall product.
 
+## 2.41 · 新闻播报 / Morning news
+
+从「新闻播报」进入「听新闻」或「看视频新闻」。方向键选择节目卡片，确认键立即播放。视频支持全屏，按一次返回键可回到节目单。定时默认每天北京时间 07:10 开播、07:50 停播，可在新闻页开关。深度待机唤醒取决于盒子和家庭自动化配置。
+
+Open **News** to listen or watch. Select a programme with the remote, press OK to play, and press Back to leave fullscreen. The optional daily morning slot runs from 07:10 to 07:50 China Standard Time. Deep-standby wake-up depends on the hardware and home automation setup.
+
+<img src="docs/images/news-guide-2.41.png" alt="M13 2.41 新闻播报节目卡片与遥控器焦点 / News guide and remote focus on M13" width="100%" />
+
 <img src="docs/images/home-2.33.png" alt="2.33 实机首页：清晰焦点与极简两行卡片 / M13 home with a clear focus border" width="100%" />
 
 *以下截图均为 2026-10-25 的 2.33 M13 实机。课程编辑与日夜屏保均使用示例课表，不含姓名、班级、私人课程、账号或登录二维码。All screenshots below show 2.33 on M13. Timetables use demo data. Third-party app icons belong to their owners.*
@@ -73,7 +81,7 @@ A seven-lesson row separates morning and afternoon beneath the calendar and weat
 
 屏保底部可显示课程：**周一至周四显示明天，周五至周日直接显示下周一**，标题明确标为“下周一课程”，并显示周一的实际日期。课程表保存在盒子应用私有区，默认安装包不包含个人课程、姓名或班级。支持在盒子上直接编辑每周课表、指定日期调课与放假。[课程配置 / Timetable configuration](docs/TIMETABLE.md). Monday–Thursday shows tomorrow; Friday–Sunday shows the upcoming Monday with an explicit label and date. Personal timetables stay on-device.
 
-当前公开版本 **2.33** 包含 2.32 的首页排序、位置保留与全屏音乐，以及本次设置、课程与播放优化。保留现有影视网格与可选语音独立包联动；语音引擎不包含在此 APK 中。Version 2.33 includes the unpublished 2.32 improvements. The speech engine remains an optional separate companion.
+**2.41** 优先播放当天发布的节目，同一天内先选科技财经。听新闻、看视频和重新打开应用共用本机已播记录。Version 2.41 prioritizes today’s editions and keeps playback history across listening, viewing and app restarts.
 
 <details><summary>遥控器编辑课程 · 示例 / Remote course editor · Demo</summary>
 
@@ -89,7 +97,7 @@ A seven-lesson row separates morning and afternoon beneath the calendar and weat
 
 ```powershell
 adb devices -l
-adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.33.apk
+adb -s <DEVICE_SERIAL> install -r .\M13-Light-Launcher-2.41.apk
 adb -s <DEVICE_SERIAL> shell am start -n local.m13.home/.MainActivity
 ```
 

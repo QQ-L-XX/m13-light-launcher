@@ -44,16 +44,20 @@ public final class LibreTvNet {
     public static HttpURLConnection open(String value,String range)throws Exception{
         return open(value,range,10000,20000);
     }
-    private static HttpURLConnection open(String value,String range,int connectMs,int readMs)throws Exception{
+    public interface RequestControl {boolean cancelled();void opened(HttpURLConnection connection);void finished(HttpURLConnection connection);}
+    public static HttpURLConnection openPoster(String value,RequestControl control)throws Exception{return open(value,null,5000,8000,control);}
+    private static HttpURLConnection open(String value,String range,int connectMs,int readMs)throws Exception{return open(value,range,connectMs,readMs,null);}
+    private static HttpURLConnection open(String value,String range,int connectMs,int readMs,RequestControl control)throws Exception{
         URL u=checked(value);
         for(int redirect=0;redirect<6;redirect++){
+            if(control!=null&&control.cancelled())throw new InterruptedIOException("海报加载已暂停");
             HttpURLConnection h=(HttpURLConnection)u.openConnection();h.setConnectTimeout(connectMs);h.setReadTimeout(readMs);h.setInstanceFollowRedirects(false);
             h.setRequestProperty("User-Agent",UA);h.setRequestProperty("Accept","*/*");h.setRequestProperty("Accept-Encoding","identity");
             if(range!=null)h.setRequestProperty("Range",range);
             if(h instanceof HttpsURLConnection)((HttpsURLConnection)h).setSSLSocketFactory(tls);
             int status;
-            try{status=h.getResponseCode();}catch(Exception e){h.disconnect();throw e;}
-            if(status==301||status==302||status==303||status==307||status==308){String location=h.getHeaderField("Location");h.disconnect();if(location==null)throw new IOException("片源重定向无效");u=checked(new URL(u,location).toString());continue;}
+            try{if(control!=null){control.opened(h);if(control.cancelled())throw new InterruptedIOException("海报加载已暂停");}status=h.getResponseCode();}catch(Exception e){h.disconnect();if(control!=null)control.finished(h);throw e;}
+            if(status==301||status==302||status==303||status==307||status==308){String location=h.getHeaderField("Location");h.disconnect();if(control!=null)control.finished(h);if(location==null)throw new IOException("片源重定向无效");u=checked(new URL(u,location).toString());continue;}
             return h;
         }throw new IOException("片源重定向过多");
     }

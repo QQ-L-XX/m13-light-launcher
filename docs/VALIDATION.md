@@ -1,5 +1,24 @@
 # 验证范围 / Validation scope
 
+## 2.41 · M13 news guide (2026-11-25)
+
+- Opened News from the M13 home screen. Directional navigation selected a programme card and OK opened the selected morning edition.
+- Video preview and the guide appeared side by side. Fullscreen used the 1920 × 1080 display while the player reported active playback. Back restored the guide, then returned home. Both alarms remained registered.
+- Two individual reports returned playback errors. The player advanced to an available report. Source availability varies.
+- On 2.40, both morning editions advanced on the device, switching between audio and video skipped played reports, and reopening the launcher retained that history.
+
+## 2.36 local M13 performance checks (2026-10-25)
+
+- Full APK build/signature verification passed; 5,419 host assertions passed, including nine monotonic retention boundary checks.
+- Tested Bili process emitted `OMX.amlogic.avc.decoder.awesome` codec logs while the active video-frame provider was `decoder.h264`. This confirms hardware H.264 decoding for that tested playback, not every possible video format or source.
+- Quick reopening through the managed launcher reused the same Bili process. After Home, it remained available with 6.3 seconds left in the two-minute grace; the device then hid it automatically after expiry with no active playback. No PC timer enforced that transition.
+- Loaded film covers used approximately 2.5 MB of decoded poster cache. With Bili foreground, all tracked film poster instances were paused with zero queued tasks, active connections and decoded cache bytes. Reopening a retained film page reloaded visible covers.
+- A direct music track advanced from 4.6 to 11.2 seconds after Home while its page poster loader was paused. Playback protection remained true. The test track was stopped afterwards.
+- The three previously selected optional stock apps remained hidden; NetEase authorization remained present. DLNA reception was reopened through the home tile and reported enabled, then the device was returned home.
+- Limits: no quantitative TV FPS or physical-remote latency claim; no new phone-to-TV casting session in this check. Low system memory may still reclaim a retained Bili process. Existing provider availability and firmware limits remain.
+- Local APK SHA-256: `62b80cbbddc042684380f8335bb869f16f298dd5c09e7b4ddd07cc5aa79dfae0` (42,333,887 bytes). Version 2.36 is installed locally and has not been published to GitHub.
+
+
 ## 2.33
 
 2026-10-25 在 M13 / Android API 22 安装 versionCode 47。已检查电视边距、首页顺序、应用页滚动及焦点保留、课程编辑和临时放假跳转、设置保存／修改／恢复、后台一分钟定时暂停、随机切歌，以及投屏视频解码后按返回回到原首页焦点。原七天课程及网易云授权保留。截图改用示例课程拍摄，之后回读七天课程及日夜模式，确认已恢复。

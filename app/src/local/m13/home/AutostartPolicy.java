@@ -41,32 +41,34 @@ public final class AutostartPolicy {
         for(String name:old)if(!wanted.contains(name)){
             boolean before=p.getBoolean("was_hidden:"+name,false);d.setApplicationHidden(admin(c),name,before);
             if(d.isApplicationHidden(admin(c),name)!=before)throw new IllegalStateException("应用恢复未完成");
-            edit.remove("was_hidden:"+name).remove("opened:"+name);
+            edit.remove("was_hidden:"+name).remove("opened:"+name).remove("opened_elapsed:"+name).remove("returned_elapsed:"+name);
         }
         if(!edit.putStringSet("selected",new HashSet<String>(wanted)).commit())throw new IllegalStateException("设置未保存");
         applyIfIdle(c);
     }
     public static void applyIfIdle(Context c){
         if(!HomePolicy.isOwner(c)||selected(c).isEmpty()||mediaActive(c))return;
-        DevicePolicyManager d=manager(c);long now=System.currentTimeMillis();String error="";
+        DevicePolicyManager d=manager(c);long now=android.os.SystemClock.elapsedRealtime();String error="";
         for(String name:selected(c))try{
-            if(Math.abs(now-prefs(c).getLong("opened:"+name,0))<20000)continue;
+            if(remaining(c,name,now)>0)continue;
             if(!d.isApplicationHidden(admin(c),name))d.setApplicationHidden(admin(c),name,true);
             if(!d.isApplicationHidden(admin(c),name))throw new IllegalStateException("后台限制未生效");
         }catch(RuntimeException e){error=name+": "+e.getMessage();}
         prefs(c).edit().putString("error",error).apply();
     }
+    private static long remaining(Context c,String name,long now){SharedPreferences p=prefs(c);return ManagedAppGrace.remaining(name,p.getLong("opened_elapsed:"+name,0),p.getLong("returned_elapsed:"+name,0),now);}
+    public static long nextCheckDelay(Context c){long delay=30000,now=android.os.SystemClock.elapsedRealtime();for(String name:selected(c)){long remaining=remaining(c,name,now);if(remaining>0)delay=Math.min(delay,remaining+100);}return Math.max(1000,delay);}
+    public static void returnedHome(Context c){SharedPreferences p=prefs(c);String name=p.getString("foreground-managed","");if(name.isEmpty())return;SharedPreferences.Editor edit=p.edit().remove("foreground-managed");if(managed(c,name))edit.putLong("returned_elapsed:"+name,android.os.SystemClock.elapsedRealtime());edit.commit();}
     public static void boot(Context c){
-        SharedPreferences.Editor edit=prefs(c).edit();for(String name:selected(c))edit.remove("opened:"+name);edit.commit();applyIfIdle(c);
+        SharedPreferences.Editor edit=prefs(c).edit();for(String name:selected(c))edit.remove("opened:"+name).remove("opened_elapsed:"+name).remove("returned_elapsed:"+name);edit.remove("foreground-managed").commit();applyIfIdle(c);
     }
     public static void launch(Context c,String name){
         if(!known(name)||!managed(c,name))throw new IllegalArgumentException("应用未设为按需启动");
         Intent launch=intent(c,name);if(launch==null)throw new IllegalStateException("找不到应用入口");
-        DevicePolicyManager d=manager(c);d.setApplicationHidden(admin(c),name,false);
+        DevicePolicyManager d=manager(c);prefs(c).edit().putLong("opened:"+name,System.currentTimeMillis()).putLong("opened_elapsed:"+name,android.os.SystemClock.elapsedRealtime()).remove("returned_elapsed:"+name).putString("foreground-managed",name).commit();if(d.isApplicationHidden(admin(c),name))d.setApplicationHidden(admin(c),name,false);
         if(d.isApplicationHidden(admin(c),name))throw new IllegalStateException("应用启用未完成");
-        prefs(c).edit().putLong("opened:"+name,System.currentTimeMillis()).commit();
         ScreenPolicy.awaken(c);c.startActivity(launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
     }
     public static void restoreAll(Context c){if(!selected(c).isEmpty())configure(c,Collections.<String>emptySet());}
-    public static String diagnostics(Context c){try{JSONObject result=new JSONObject().put("owner",HomePolicy.isOwner(c)).put("mediaProtected",mediaActive(c)).put("error",prefs(c).getString("error","")).put("selected",new JSONArray(selected(c)));JSONArray targets=new JSONArray();DevicePolicyManager d=manager(c);for(int n=0;n<PACKAGES.length;n++){String name=PACKAGES[n];targets.put(new JSONObject().put("package",name).put("name",LABELS[n]).put("managed",managed(c,name)).put("hidden",d.isApplicationHidden(admin(c),name)).put("launch",prefs(c).getString("launch:"+name,"")));}return result.put("targets",targets).toString();}catch(Exception e){return "{}";}}
+    public static String diagnostics(Context c){try{JSONObject result=new JSONObject().put("owner",HomePolicy.isOwner(c)).put("mediaProtected",mediaActive(c)).put("error",prefs(c).getString("error","")).put("selected",new JSONArray(selected(c)));JSONArray targets=new JSONArray();DevicePolicyManager d=manager(c);for(int n=0;n<PACKAGES.length;n++){String name=PACKAGES[n];targets.put(new JSONObject().put("package",name).put("name",LABELS[n]).put("managed",managed(c,name)).put("hidden",d.isApplicationHidden(admin(c),name)).put("launch",prefs(c).getString("launch:"+name,"")).put("retentionMs",ManagedAppGrace.duration(name)).put("graceRemainingMs",remaining(c,name,android.os.SystemClock.elapsedRealtime())));}return result.put("targets",targets).toString();}catch(Exception e){return "{}";}}
 }

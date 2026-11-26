@@ -45,10 +45,10 @@ public class MainActivity extends Activity {
     private TextView clock,date,heroTitle,heroSubtitle,cleanButton;
     private boolean allApps;
     private String focusedPackage;
-    private final String[] defaults={"com.xiaodianshi.tv.yst","com.gitvdideo.aliapp","com.yunos.app.videoplayer"};
+    private final String[] defaults={"com.xiaodianshi.tv.yst","com.yunos.app.videoplayer"};
     private final Runnable tick=new Runnable(){public void run(){tickClock();VoiceWarmup.request(MainActivity.this);handler.postDelayed(this,30000);}};
 
-    private final Runnable restrictIdle=new Runnable(){public void run(){AutostartPolicy.applyIfIdle(MainActivity.this);handler.postDelayed(this,30000);}};
+    private final Runnable restrictIdle=new Runnable(){public void run(){AutostartPolicy.applyIfIdle(MainActivity.this);handler.postDelayed(this,AutostartPolicy.nextCheckDelay(MainActivity.this));}};
 
     public void onCreate(Bundle saved){
         super.onCreate(saved);live=new java.lang.ref.WeakReference<MainActivity>(this);
@@ -58,13 +58,14 @@ public class MainActivity extends Activity {
         preferences=getSharedPreferences("home",MODE_PRIVATE);
         if(!preferences.getBoolean("layout_24",false))preferences.edit().putBoolean("layout_24",true).putInt("theme",1).apply();
         if(!preferences.getBoolean("blue_red_29",false))preferences.edit().putBoolean("blue_red_29",true).putInt("theme",0).apply();
+        NewsSchedule.schedule(this);
         HomePolicy.applyIfOwner(this);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         ScreenPolicy.applyWindow(this);
         if(preferences.getBoolean("home_key_enabled",false))startService(new Intent(this,HomeKeyService.class));
         else stopService(new Intent(this,HomeKeyService.class));
     }
-    protected void onResume(){super.onResume();ScreenPolicy.applyWindow(this);if(rootView==null||appsDirty||settingsHash!=preferences.getAll().hashCode())build();else tickClock();handler.removeCallbacks(tick);handler.post(tick);handler.removeCallbacks(restrictIdle);handler.postDelayed(restrictIdle,20000);}
+    protected void onResume(){super.onResume();AutostartPolicy.returnedHome(this);ScreenPolicy.applyWindow(this);if(rootView==null||appsDirty||settingsHash!=preferences.getAll().hashCode())build();else tickClock();handler.removeCallbacks(tick);handler.post(tick);handler.removeCallbacks(restrictIdle);handler.postDelayed(restrictIdle,20000);}
     protected void onPause(){rememberPage();handler.removeCallbacks(restrictIdle);handler.removeCallbacks(tick);super.onPause();}
     protected void onDestroy(){unregisterReceiver(packageChanges);if(live.get()==this)live.clear();handler.removeCallbacks(restrictIdle);handler.removeCallbacks(tick);super.onDestroy();}
     public void onNewIntent(Intent intent){super.onNewIntent(intent);ScreenPolicy.applyWindow(this);HomePolicy.applyIfOwner(this);if(allApps)switchPage(false);else if(rootView==null||appsDirty)build();}
@@ -88,7 +89,7 @@ public class MainActivity extends Activity {
         Intent query=new Intent(Intent.ACTION_MAIN);query.addCategory(Intent.CATEGORY_LAUNCHER);
         for(ResolveInfo r:pm.queryIntentActivities(query,0)){
             String pkg=r.activityInfo.packageName;
-            if(pkg.equals(getPackageName())||pkg.equals("me.efesser.flauncher")||pkg.equals("com.yunos.tv.probe")||pkg.equals("com.taintan.tv.test")||pkg.equals("com.mipt.autotestfora8"))continue;
+            if(pkg.equals("com.gitvdideo.aliapp")||pkg.equals(getPackageName())||pkg.equals("me.efesser.flauncher")||pkg.equals("com.yunos.tv.probe")||pkg.equals("com.taintan.tv.test")||pkg.equals("com.mipt.autotestfora8"))continue;
             Intent launch=pm.getLaunchIntentForPackage(pkg);
             if(launch!=null)map.put(pkg,new App(r.loadLabel(pm).toString(),pkg,r.loadIcon(pm),launch));
         }
@@ -100,6 +101,7 @@ public class MainActivity extends Activity {
         List<App> apps=new ArrayList<App>(map.values());
         final App libre=new App("LibreTV","__libretv__",null,new Intent(this,LibreTvLibraryActivity.class));
         apps.add(libre);
+        final App news=new App("新闻播报","__news__",null,new Intent(this,NewsActivity.class));apps.add(news);
         final App music=new App("轻音乐","__music__",null,new Intent(this,MusicActivity.class));apps.add(music);
         final App cast=new App("投屏","__cast__",null,new Intent(this,CastActivity.class));apps.add(cast);
         Collections.sort(apps,new Comparator<App>(){public int compare(App a,App b){return a.name.compareToIgnoreCase(b.name);}});
@@ -107,6 +109,7 @@ public class MainActivity extends Activity {
         List<App> home=new ArrayList<App>();
         if(!preferences.getBoolean("hidden:__libretv__",false))home.add(libre);
         if(!preferences.getBoolean("hidden:__music__",false))home.add(music);
+        if(!preferences.getBoolean("hidden:__news__",false))home.add(news);
         for(String wanted:defaults)for(App app:apps)if(app.pkg.equals(wanted)&&!preferences.getBoolean("hidden:"+app.pkg,false))home.add(app);
         if(!preferences.getBoolean("hidden:__cast__",false))home.add(cast);
         for(App app:apps)if(preferences.getBoolean("favorite:"+app.pkg,false)&&!preferences.getBoolean("hidden:"+app.pkg,false)&&!home.contains(app))home.add(app);
@@ -116,6 +119,7 @@ public class MainActivity extends Activity {
     private String description(App app){
         if(AutostartPolicy.managed(this,app.pkg))return "按需启动 · 点开即可使用";
         if(app.pkg.equals("__libretv__"))return "电影 · 剧集 · 继续观看";
+        if(app.pkg.equals("__news__"))return "听新闻 · 看视频新闻";
         if(app.pkg.equals("__music__"))return "歌曲 · 歌单 · 同步歌词 · 本机独立运行";
         if(app.pkg.equals("__cast__"))return "把手机上的喜欢，放到大屏";
         if(app.pkg.equals("__more__"))return allApps?"回到常用应用":"所有应用，都在这里";
@@ -197,14 +201,14 @@ public class MainActivity extends Activity {
         }});
         if(!app.pkg.equals("__more__"))card.setOnLongClickListener(new View.OnLongClickListener(){public boolean onLongClick(View v){organize(app);return true;}});return card;
     }
-    private boolean isDefault(String pkg){if(pkg.equals("__music__")||pkg.equals("__libretv__")||pkg.equals("__cast__"))return true;for(String p:defaults)if(p.equals(pkg))return true;return false;}
+    private boolean isDefault(String pkg){if(pkg.equals("__news__")||pkg.equals("__music__")||pkg.equals("__libretv__")||pkg.equals("__cast__"))return true;for(String p:defaults)if(p.equals(pkg))return true;return false;}
     private void organize(final App app){
         final boolean visible=isDefault(app.pkg)?!preferences.getBoolean("hidden:"+app.pkg,false):preferences.getBoolean("favorite:"+app.pkg,false);
         new AlertDialog.Builder(this).setTitle(app.name).setItems(visible?new String[]{"从首页移除","调整首页顺序","应用信息"}:new String[]{"添加到首页","应用信息"},new android.content.DialogInterface.OnClickListener(){
             public void onClick(android.content.DialogInterface d,int which){
                 if(which==0){SharedPreferences.Editor e=preferences.edit();if(isDefault(app.pkg))e.putBoolean("hidden:"+app.pkg,visible);else e.putBoolean("favorite:"+app.pkg,!visible);e.apply();focusedPackage=null;build();}
                 else if(visible&&which==1)reorder(app);
-                else try{if(app.pkg.equals("__libretv__"))startActivity(new Intent(MainActivity.this,LibreTvLibraryActivity.class));else if(app.pkg.equals("__music__"))startActivity(new Intent(MainActivity.this,MusicActivity.class));else if(app.pkg.equals("__cast__"))startActivity(new Intent(MainActivity.this,CastActivity.class));else startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.parse("package:"+app.pkg)));}catch(Exception e){message("暂时无法打开应用信息");}
+                else try{if(app.pkg.equals("__news__"))startActivity(app.intent);else if(app.pkg.equals("__libretv__"))startActivity(new Intent(MainActivity.this,LibreTvLibraryActivity.class));else if(app.pkg.equals("__music__"))startActivity(new Intent(MainActivity.this,MusicActivity.class));else if(app.pkg.equals("__cast__"))startActivity(new Intent(MainActivity.this,CastActivity.class));else startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.parse("package:"+app.pkg)));}catch(Exception e){message("暂时无法打开应用信息");}
             }
         }).show();
     }
@@ -226,7 +230,7 @@ public class MainActivity extends Activity {
     }
     private void autostartSettings(){
         final java.util.Set<String> selected=AutostartPolicy.selected(this);final boolean[] checked=new boolean[AutostartPolicy.PACKAGES.length];for(int n=0;n<checked.length;n++)checked[n]=selected.contains(AutostartPolicy.PACKAGES[n]);
-        new AlertDialog.Builder(this).setTitle("后台与自启动").setMultiChoiceItems(new String[]{"旧 FLauncher 桌面 · 停用","云视听小电视 · 按需启动","银河奇异果 · 按需启动"},checked,new android.content.DialogInterface.OnMultiChoiceClickListener(){public void onClick(android.content.DialogInterface d,int n,boolean on){if(on)selected.add(AutostartPolicy.PACKAGES[n]);else selected.remove(AutostartPolicy.PACKAGES[n]);}})
+        new AlertDialog.Builder(this).setTitle("后台与自启动").setMultiChoiceItems(new String[]{"旧 FLauncher 桌面 · 停用","云视听小电视 · 返回后保留约两分钟","银河奇异果 · 按需启动"},checked,new android.content.DialogInterface.OnMultiChoiceClickListener(){public void onClick(android.content.DialogInterface d,int n,boolean on){if(on)selected.add(AutostartPolicy.PACKAGES[n]);else selected.remove(AutostartPolicy.PACKAGES[n]);}})
             .setPositiveButton("保存",new android.content.DialogInterface.OnClickListener(){public void onClick(android.content.DialogInterface d,int w){try{AutostartPolicy.configure(MainActivity.this,selected);build();message("已保存。选中的视频应用从轻桌面点开即可使用；回桌面且无播放后会限制后台。\n轻桌面 M13 投屏保留；视频应用自己的专用投屏需先打开对应应用。\n取消勾选可恢复原状。");}catch(Exception e){message("设置未完成："+e.getMessage());}}})
             .setNeutralButton("说明",new android.content.DialogInterface.OnClickListener(){public void onClick(android.content.DialogInterface d,int w){message("仅手动打开：闲置时停用后台入口，点开应用时恢复。应用、账号和观看记录会保留。\n播放期间保留后台。轻桌面 M13 投屏正常；第三方应用自己的专用投屏需先打开对应应用。\n这台系统不提供单独的自启动开关，因此使用按需启用方式。");}}).setNegativeButton("返回",null).show();
     }

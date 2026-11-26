@@ -21,3 +21,9 @@ subprocess.run([tool('java'),'-cp',str(dest),'M13HomeOrderChecks'],check=True)
 
 subprocess.run([tool('javac'),'-encoding','UTF-8','-cp',str(dest),'-d',str(dest),*[str(root/'app/src/local/m13/home'/name) for name in ['MusicQueuePolicy.java','UpdateVersion.java']],str(root/'tests/M13FeatureChecks.java')],check=True)
 subprocess.run([tool('java'),'-cp',str(dest),'M13FeatureChecks'],check=True)
+
+subprocess.run([tool('javac'),'-encoding','UTF-8','-d',str(dest),str(root/'app/src/local/m13/home/VideoSeek.java'),str(root/'tests/M13VideoSeekChecks.java')],check=True)
+subprocess.run([tool('java'),'-cp',str(dest),'M13VideoSeekChecks'],check=True)
+
+subprocess.run([tool('javac'),'-encoding','UTF-8','-d',str(dest),str(root/'app/src/local/m13/home/ManagedAppGrace.java'),str(root/'tests/M13ManagedAppGraceChecks.java')],check=True)
+subprocess.run([tool('java'),'-cp',str(dest),'M13ManagedAppGraceChecks'],check=True)

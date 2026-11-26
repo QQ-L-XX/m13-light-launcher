@@ -53,6 +53,7 @@ public final class HomePolicy {
         }catch(RuntimeException e){c.getSharedPreferences("home",0).edit().putString("screensaver_error",e.toString()).commit();Log.e("M13HomePolicy","Screensaver blocking failed",e);}
     }
     public static void restore(Context c){
+        PreinstalledApps.restoreAll(c);
         AutostartPolicy.restoreAll(c);
         ScreenPolicy.restore(c);
         DevicePolicyManager d=manager(c);ComponentName a=admin(c);

@@ -24,8 +24,8 @@ public final class MusicActivity extends Activity {
     private final Runnable lyricTick=new Runnable(){public void run(){MusicService m=MusicService.current();if(m!=null)renderLyrics(m,m.position());ui.postDelayed(this,100);}};
     public void onCreate(Bundle saved){super.onCreate(saved);live=new java.lang.ref.WeakReference<MusicActivity>(this);getWindow().setFlags(1024,1024);ScreenPolicy.applyWindow(this);NeteaseAccount.init(this);store=new MusicStore(this);posters=new LibreTvPosters(this);build();String requested=getIntent().getStringExtra("query");if(requested!=null&&!requested.trim().isEmpty()){word=requested;query.setText(word);}if(saved!=null){source=saved.getString("source","wy");word=saved.getString("word","纯音乐");query.setText(word);}search(true);}
     protected void onSaveInstanceState(Bundle b){super.onSaveInstanceState(b);b.putString("source",source);b.putString("word",word);}
-    protected void onResume(){super.onResume();TvUi.inset(this);ScreenPolicy.awaken(this);ScreenPolicy.applyWindow(this);applyLyricFont();ui.removeCallbacks(tick);ui.post(tick);ui.removeCallbacks(lyricTick);ui.post(lyricTick);}
-    protected void onPause(){ui.removeCallbacks(lyricTick);ui.removeCallbacks(tick);super.onPause();}
+    protected void onResume(){super.onResume();if(posters.isPaused())coverKey="";posters.resume();TvUi.inset(this);ScreenPolicy.awaken(this);ScreenPolicy.applyWindow(this);applyLyricFont();ui.removeCallbacks(tick);ui.post(tick);ui.removeCallbacks(lyricTick);ui.post(lyricTick);}
+    protected void onPause(){posters.pause();ui.removeCallbacks(lyricTick);ui.removeCallbacks(tick);super.onPause();}
     protected void onDestroy(){NeteaseLoginDialog.closeFor(this);destroyed=true;generation++;worker.shutdownNow();ui.removeCallbacksAndMessages(null);posters.close();if(live.get()==this)live.clear();super.onDestroy();}
     private int dp(float n){return(int)(getResources().getDisplayMetrics().density*n+.5f);}
     private GradientDrawable bg(int color){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(12));return d;}
